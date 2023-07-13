@@ -1,0 +1,18 @@
+env:
+  node: true
+extends:
+  - eslint:recommended
+  - plugin:@typescript-eslint/recommended
+  - plugin:prettier/recommended
+parser: '@typescript-eslint/parser'
+parserOptions:
+  ecmaVersion: 9
+  project: ./tsconfig.json
+plugins:
+  - '@typescript-eslint'
+rules:
+  'prettier/prettier': warn
+  '@typescript-eslint/no-unused-vars':
+    - warn
+    - args: after-used
+      ignoreRestSiblings: false
