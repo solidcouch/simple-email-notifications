@@ -1,0 +1,4 @@
+[
+  { "podName": "bot", "email": "bot@example", "password": "password" },
+  { "podName": "person", "email": "person@example", "password": "password" }
+]

@@ -1,10 +1,10 @@
 {
-  "name": "node-typescript-starter",
+  "name": "solid-email-notifications",
   "version": "0.0.1",
   "main": "dist/index.js",
   "scripts": {
     "start": "tsc && node dist/index.js",
-    "format": "prettier 'src/**/*.ts' --write",
+    "format": "prettier 'src/**/*.ts' '**/*.{md,yml,yaml,json}' --write",
     "lint": "eslint . --ext .ts"
   },
   "license": "MIT",
@@ -19,6 +19,7 @@
     "typescript": "^5.1.6"
   },
   "dependencies": {
+    "@inrupt/solid-client-authn-node": "^1.17.0",
     "dotenv": "^16.0.0"
   }
 }
