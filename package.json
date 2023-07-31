@@ -5,20 +5,27 @@
   "scripts": {
     "start": "tsc && node dist/index.js",
     "format": "prettier 'src/**/*.ts' '**/*.{md,yml,yaml,json}' --write",
-    "lint": "eslint . --ext .ts"
+    "lint": "eslint . --ext .ts",
+    "test": "mocha"
   },
   "license": "MIT",
   "devDependencies": {
+    "@solid/community-server": "^6.0.1",
+    "@types/chai": "^4.3.5",
     "@types/co-body": "^6.1.0",
     "@types/koa": "^2.13.7",
     "@types/koa__router": "^12.0.0",
+    "@types/mocha": "^10.0.1",
     "@types/node": "^20.4.2",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
+    "chai": "^4.3.7",
     "eslint": "^8.13.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^5.0.0",
+    "mocha": "^10.2.0",
     "prettier": "^3.0.0",
+    "ts-node": "^10.9.1",
     "typescript": "^5.1.6"
   },
   "dependencies": {

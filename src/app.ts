@@ -13,10 +13,14 @@ router
       'Hello world! This is a Solid email notifier. Read more at https://github.com/openHospitalityNetwork/solid-email-notifications'
   })
   .post('/inbox', solidAuth, async (ctx, next) => {
-    console.log(ctx.state.user, ctx.state.client)
     // we should receive info about webId and email address
+    const email: string = ctx.request.body.email
+    const webId: string = ctx.request.body.actor
+    const inbox: string = ctx.request.body.object
 
-    // perhaps webId should be the one of authenticated user
+    // webId should belong to the authenticated user
+
+    if (webId !== ctx.state.user) ctx.throw(403, {})
 
     // search for webId's inbox
 
@@ -40,7 +44,10 @@ app
   .use(
     bodyParser({
       enableTypes: ['text', 'json'],
-      extendTypes: { json: ['application/ld+json'], text: ['text/turtle'] },
+      extendTypes: {
+        json: ['application/ld+json'],
+        text: ['text/turtle'],
+      },
     }),
   )
   .use(router.routes())

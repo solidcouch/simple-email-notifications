@@ -30,6 +30,7 @@ config()
   const authFetch = await getAuthenticatedFetch({
     email: 'bot@example',
     password: 'password',
+    solidServer: 'http://localhost:3000',
   })
   // authFetch can now be used as a standard fetch function that will authenticate as your WebID.
   // This request will do a simple GET for example.
@@ -52,6 +53,7 @@ config()
   const personAuthFetch = await getAuthenticatedFetch({
     email: 'person@example',
     password: 'password',
+    solidServer: 'http://localhost:3000',
   })
 
   const inboxResponse = await personAuthFetch('http://localhost:4000/inbox', {

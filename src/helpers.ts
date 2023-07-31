@@ -9,8 +9,9 @@ type Credentials = { email: string; password: string }
 export const getAuthenticatedFetch = async ({
   email,
   password,
-}: Credentials) => {
-  const response = await fetch('http://localhost:3000/idp/credentials/', {
+  solidServer,
+}: Credentials & { solidServer: string }) => {
+  const response = await fetch(`${solidServer}/idp/credentials/`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
     // The email/password fields are those of your account.
@@ -28,7 +29,7 @@ export const getAuthenticatedFetch = async ({
   // This URL can be found by looking at the "token_endpoint" field at
   // http://localhost:3000/.well-known/openid-configuration
   // if your server is hosted at http://localhost:3000/.
-  const tokenUrl = 'http://localhost:3000/.oidc/token'
+  const tokenUrl = `${solidServer}/.oidc/token`
   const response2 = await fetch(tokenUrl, {
     method: 'POST',
     headers: {
