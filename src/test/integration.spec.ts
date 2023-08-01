@@ -1,14 +1,25 @@
 import * as css from '@solid/community-server'
 import { expect } from 'chai'
 import { IncomingMessage, Server, ServerResponse } from 'http'
+import MailDev from 'maildev'
 import { describe } from 'mocha'
+import Mail from 'nodemailer/lib/mailer'
+import sinon from 'sinon'
 import app from '../app'
 import { getAuthenticatedFetch } from '../helpers'
+import * as mailerService from '../services/mailerService'
 
 describe('Mailer integration via /inbox', () => {
   let server: Server<typeof IncomingMessage, typeof ServerResponse>
   let authenticatedFetch: typeof fetch
   let cssServer: css.App
+
+  let sendMailSpy: sinon.SinonSpy<[options: Mail.Options], Promise<void>>
+
+  beforeEach(() => {
+    sinon.restore()
+    sendMailSpy = sinon.spy(mailerService, 'sendMail')
+  })
 
   before(async function () {
     this.timeout(20000)
@@ -48,6 +59,19 @@ describe('Mailer integration via /inbox', () => {
     server.close(done)
   })
 
+  // run maildev server
+  let maildev: InstanceType<typeof MailDev>
+  before(done => {
+    maildev = new MailDev({
+      silent: true, // Set to false if you want to see server logs
+      disableWeb: true, // Disable the web interface for testing
+    })
+    maildev.listen(done)
+  })
+  after(done => {
+    maildev.close(done)
+  })
+
   it('should be able to receive integration request to inbox', async () => {
     const response = await authenticatedFetch(`http://localhost:3005/inbox`, {
       method: 'post',
@@ -65,6 +89,26 @@ describe('Mailer integration via /inbox', () => {
       }),
     })
 
+    console.log(await response.text())
+    expect(sendMailSpy.calledOnce).to.be.true
+    expect(sendMailSpy.firstCall.firstArg).to.haveOwnProperty(
+      'to',
+      'email@example.com',
+    )
+    expect(sendMailSpy.firstCall.firstArg)
+      .to.haveOwnProperty('text')
+      .include(
+        `verify-email?id=${encodeURIComponent(
+          'http://localhost:3456/person/profile/card#me',
+        )}&token=`,
+      )
+    expect(sendMailSpy.firstCall.firstArg)
+      .to.haveOwnProperty('html')
+      .include(
+        `verify-email?id=${encodeURIComponent(
+          'http://localhost:3456/person/profile/card#me',
+        )}&token=`,
+      )
     expect(response.status).to.equal(200)
   })
 

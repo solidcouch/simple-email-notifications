@@ -2,3 +2,5 @@
 dist
 output
 node_modules
+
+database.sqlite

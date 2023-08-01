@@ -1,8 +1,12 @@
 import bodyParser from '@koa/bodyparser'
 import Router from '@koa/router'
+import { hash } from 'bcryptjs'
+import crypto from 'crypto'
 import Koa from 'koa'
 import helmet from 'koa-helmet'
+import { EmailVerification } from './config/sequelize'
 import { solidAuth } from './middlewares/solidAuth'
+import { sendMail } from './services/mailerService'
 
 const app = new Koa()
 const router = new Router()
@@ -14,7 +18,7 @@ router
   })
   .post('/inbox', solidAuth, async (ctx, next) => {
     // we should receive info about webId and email address
-    const email: string = ctx.request.body.email
+    const email: string = ctx.request.body.target
     const webId: string = ctx.request.body.actor
     const inbox: string = ctx.request.body.object
 
@@ -27,6 +31,34 @@ router
     // try to subscribe to the inbox
 
     // send verification email to provided email address
+    const token = crypto.randomBytes(64).toString('base64url').slice(0, 72) // there is no sense in having more than 72, since bcrypt cuts remaining stuff away
+    // or we would need to use different hashing
+    const tokenHash = await hash(token, 12)
+    // tokens should expire (in 1 hour perhaps?)
+    const tokenExpiration = Date.now() + 3600 * 1000
+
+    // save the webId, email, and hashedToken to database
+    try {
+      await EmailVerification.create({
+        webId,
+        email,
+        inbox,
+        tokenHash,
+        tokenExpiration,
+      })
+    } catch (e) {
+      console.error(e)
+    }
+
+    const emailVerificationLink = `https://example.com/verify-email?id=${encodeURIComponent(
+      webId,
+    )}&token=${token}`
+
+    await sendMail({
+      to: email,
+      html: `Please verify your email <a href="${emailVerificationLink}">click here</a>`,
+      text: `Please verify your email ${emailVerificationLink}`,
+    })
     ctx.response.body = 'not implemented'
   })
   .get('/verify-email', async (ctx, next) => {
