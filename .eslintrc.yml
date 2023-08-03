@@ -16,3 +16,4 @@ rules:
     - warn
     - args: after-used
       ignoreRestSiblings: false
+  'no-console': 'warn'

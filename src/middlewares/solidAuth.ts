@@ -21,8 +21,6 @@ export const solidAuth: Middleware = async (ctx, next) => {
 
     ctx.state.user = webId
     ctx.state.client = clientId
-
-    return next()
   } catch (error: unknown) {
     const message = `Error verifying Access Token via WebID: ${
       (error as Error).message
@@ -30,4 +28,7 @@ export const solidAuth: Middleware = async (ctx, next) => {
 
     ctx.throw(401, { error: message })
   }
+
+  // on success continue
+  return await next()
 }
