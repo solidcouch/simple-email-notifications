@@ -45,6 +45,7 @@ export const initializeIntegration: Middleware = async ctx => {
 
   await sendMail({
     to: email,
+    subject: 'TODO',
     html: `Please verify your email <a href="${emailVerificationLink}">click here</a>`,
     text: `Please verify your email ${emailVerificationLink}`,
   })

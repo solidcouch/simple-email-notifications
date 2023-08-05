@@ -10,7 +10,11 @@ let authenticatedFetch: typeof fetch
 let cssServer: css.App
 
 before(async function () {
-  this.timeout(25000)
+  this.timeout(60000)
+  const start = Date.now()
+
+  // eslint-disable-next-line no-console
+  console.log('Starting CSS server')
   // Community Solid Server (CSS) set up following example in https://github.com/CommunitySolidServer/hello-world-component/blob/main/test/integration/Server.test.ts
   cssServer = await new css.AppRunner().create(
     {
@@ -29,6 +33,9 @@ before(async function () {
     },
   )
   await cssServer.start()
+
+  // eslint-disable-next-line no-console
+  console.log('CSS server started in', (Date.now() - start) / 1000, 'seconds')
 
   authenticatedFetch = await getAuthenticatedFetch({
     email: 'person@example',

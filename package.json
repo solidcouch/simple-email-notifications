@@ -34,6 +34,7 @@
     "maildev": "^2.1.0",
     "mocha": "^10.2.0",
     "prettier": "^3.0.0",
+    "rdf-namespaces": "^1.11.0",
     "sinon": "^15.2.0",
     "ts-node": "^10.9.1",
     "typescript": "^5.1.6"

@@ -7,6 +7,7 @@ import {
   finishIntegration,
   initializeIntegration,
 } from './controllers/integration'
+import { webhookReceiver } from './controllers/webhookReceiver'
 import { solidAuth } from './middlewares/solidAuth'
 
 const app = new Koa()
@@ -19,10 +20,7 @@ router
   })
   .post('/inbox', solidAuth, initializeIntegration)
   .get('/verify-email', checkVerificationLink, finishIntegration)
-  .post('/webhook-receiver', async ctx => {
-    ctx.response.status = 202
-    ctx.response.body = 'Accepted'
-  })
+  .post('/webhook-receiver', webhookReceiver)
 
 app
   .use(helmet())
