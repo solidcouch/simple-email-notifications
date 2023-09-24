@@ -28,7 +28,7 @@ export const initializeIntegration: Middleware = async ctx => {
   // or we would need to use different hashing
   const tokenHash = await hash(token, 12)
   // tokens should expire (in 1 hour perhaps?)
-  const tokenExpiration = Date.now() + 3600 * 1000
+  const tokenExpiration = Date.now() + config.emailVerificationExpiration
 
   // save the webId, email, and hashedToken to database
   await EmailVerification.create({

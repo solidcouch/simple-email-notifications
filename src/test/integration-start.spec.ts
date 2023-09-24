@@ -2,6 +2,7 @@ import { expect } from 'chai'
 import { describe } from 'mocha'
 import Mail from 'nodemailer/lib/mailer'
 import { SinonSandbox, SinonSpy, createSandbox } from 'sinon'
+import { baseUrl } from '../config'
 import * as mailerService from '../services/mailerService'
 import { authenticatedFetch } from './testSetup.spec'
 
@@ -19,7 +20,7 @@ describe('Mailer integration via /inbox', () => {
   })
 
   it('should be able to receive integration request to inbox', async () => {
-    const response = await authenticatedFetch(`http://localhost:3005/inbox`, {
+    const response = await authenticatedFetch(`${baseUrl}/inbox`, {
       method: 'post',
       headers: {
         'content-type':
@@ -59,7 +60,7 @@ describe('Mailer integration via /inbox', () => {
 
   context('person not signed in', () => {
     it('should respond with 401', async () => {
-      const response = await fetch(`http://localhost:3005/inbox`, {
+      const response = await fetch(`${baseUrl}/inbox`, {
         method: 'post',
         headers: { 'content-type': 'application/ld+json' },
         body: JSON.stringify({
@@ -78,7 +79,7 @@ describe('Mailer integration via /inbox', () => {
 
   context("authenticated person and actor don't match", () => {
     it('should respond with 403', async () => {
-      const response = await authenticatedFetch(`http://localhost:3005/inbox`, {
+      const response = await authenticatedFetch(`${baseUrl}/inbox`, {
         method: 'post',
         headers: { 'content-type': 'application/ld+json' },
         body: JSON.stringify({
@@ -96,7 +97,7 @@ describe('Mailer integration via /inbox', () => {
   })
 
   it('should check that the person requesting is the authenticated person', async () => {
-    const response = await authenticatedFetch(`http://localhost:3005/inbox`, {
+    const response = await authenticatedFetch(`${baseUrl}/inbox`, {
       method: 'post',
       headers: { 'content-type': 'application/ld+json' },
       body: JSON.stringify({}),

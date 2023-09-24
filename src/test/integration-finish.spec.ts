@@ -3,6 +3,7 @@ import * as cheerio from 'cheerio'
 import { describe } from 'mocha'
 import Mail from 'nodemailer/lib/mailer'
 import { SinonSandbox, SinonSpy, createSandbox } from 'sinon'
+import { baseUrl } from '../config'
 import * as mailerService from '../services/mailerService'
 import { authenticatedFetch } from './testSetup.spec'
 
@@ -23,24 +24,21 @@ describe('email verification via /verify-email?id=webId&token=base64Token', () =
 
   beforeEach(async () => {
     // initialize the integration
-    const initResponse = await authenticatedFetch(
-      `http://localhost:3005/inbox`,
-      {
-        method: 'post',
-        headers: {
-          'content-type':
-            'application/ld+json;profile="https://www.w3.org/ns/activitystreams"',
-        },
-        body: JSON.stringify({
-          '@context': 'https://www.w3.org/ns/activitystreams',
-          '@id': '',
-          '@type': 'Add',
-          actor: 'http://localhost:3456/person/profile/card#me',
-          object: 'http://localhost:3456/person/profile/card',
-          target: 'email@example.com',
-        }),
+    const initResponse = await authenticatedFetch(`${baseUrl}/inbox`, {
+      method: 'post',
+      headers: {
+        'content-type':
+          'application/ld+json;profile="https://www.w3.org/ns/activitystreams"',
       },
-    )
+      body: JSON.stringify({
+        '@context': 'https://www.w3.org/ns/activitystreams',
+        '@id': '',
+        '@type': 'Add',
+        actor: 'http://localhost:3456/person/profile/card#me',
+        object: 'http://localhost:3456/person/profile/card',
+        target: 'email@example.com',
+      }),
+    })
 
     expect(initResponse.status).to.equal(200)
     // email was sent
@@ -63,14 +61,14 @@ describe('email verification via /verify-email?id=webId&token=base64Token', () =
 
   it('[integration for webId not started] should respond with 400', async () => {
     const response = await fetch(
-      'http://localhost:3005/verify-email?id=asdf&token=12345678',
+      `${baseUrl}/verify-email?id=asdf&token=12345678`,
     )
     expect(response.status).to.equal(400)
     expect(await response.text()).to.equal('Verification link is invalid')
   })
 
   it('[missing id or token] should respond with 400', async () => {
-    const response = await fetch('http://localhost:3005/verify-email')
+    const response = await fetch(`${baseUrl}/verify-email`)
     expect(response.status).to.equal(400)
     expect(await response.text()).to.equal(
       'This is not a valid verification link. Have you received the link in your email?',

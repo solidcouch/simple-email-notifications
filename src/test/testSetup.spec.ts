@@ -2,6 +2,7 @@ import * as css from '@solid/community-server'
 import { IncomingMessage, Server, ServerResponse } from 'http'
 import MailDev from 'maildev'
 import app from '../app'
+import { port } from '../config'
 import { EmailVerification } from '../config/sequelize'
 import { getAuthenticatedFetch } from '../helpers'
 
@@ -48,7 +49,7 @@ after(async () => {
 })
 
 before(done => {
-  server = app.listen(3005, done)
+  server = app.listen(port, done)
 })
 after(done => {
   server.close(done)

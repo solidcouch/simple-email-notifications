@@ -4,6 +4,7 @@ import { describe } from 'mocha'
 import Mail from 'nodemailer/lib/mailer'
 import { SinonSandbox, SinonSpy, createSandbox } from 'sinon'
 import { promisify } from 'util'
+import { baseUrl } from '../config'
 import { getAuthenticatedFetch } from '../helpers'
 import * as mailerService from '../services/mailerService'
 import { addRead, setupInbox } from '../setup'
@@ -36,24 +37,21 @@ describe('received notification via /webhook-receiver', () => {
   beforeEach(async function () {
     this.timeout(10000)
     // initialize the integration
-    const initResponse = await authenticatedFetch(
-      `http://localhost:3005/inbox`,
-      {
-        method: 'post',
-        headers: {
-          'content-type':
-            'application/ld+json;profile="https://www.w3.org/ns/activitystreams"',
-        },
-        body: JSON.stringify({
-          '@context': 'https://www.w3.org/ns/activitystreams',
-          '@id': '',
-          '@type': 'Add',
-          actor: 'http://localhost:3456/person/profile/card#me',
-          object: 'http://localhost:3456/person/inbox/',
-          target: 'email@example.com',
-        }),
+    const initResponse = await authenticatedFetch(`${baseUrl}/inbox`, {
+      method: 'post',
+      headers: {
+        'content-type':
+          'application/ld+json;profile="https://www.w3.org/ns/activitystreams"',
       },
-    )
+      body: JSON.stringify({
+        '@context': 'https://www.w3.org/ns/activitystreams',
+        '@id': '',
+        '@type': 'Add',
+        actor: 'http://localhost:3456/person/profile/card#me',
+        object: 'http://localhost:3456/person/inbox/',
+        target: 'email@example.com',
+      }),
+    })
 
     expect(initResponse.status).to.equal(200)
     // email was sent

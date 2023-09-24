@@ -13,17 +13,23 @@ This service sends an email when a new notification arrives to your Solid Pod in
 - It will regularly re-subscribe to your inbox because some Solid pods drop the subscription regularly
 - If your pod doesn't support webhook notifications, maybe this bot will check your inbox regularly (a few times per day) and send you a notification when it finds something new there
 
-## Usage (WIP)
+## Usage
 
-If you want to run the current experiments, you need to install [CommunitySolidServer](https://github.com/CommunitySolidServer/CommunitySolidServer) and run it with option `--seededPodConfigJson path/to/experimental-pod-seed.json`
+### Configure
 
-Then run in other terminal
+To authenticate itself, the mailer needs to have its own identity, it can be identity hosted on some Community Solid Server
 
-```bash
+Copy `.env.sample` to `.env` and edit the latter according to your needs
+
+### Run
+
+```sh
 yarn start
 ```
 
-and see some output
+### Use
+
+TODO
 
 ## Tests
 
