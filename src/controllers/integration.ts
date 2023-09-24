@@ -159,6 +159,8 @@ const getWebhookChannel = async (
 
   const dru = new URL(descriptionResourceUri as string, url).toString()
   // we want to include looking into this resource, too
+  // TODO use this variable below
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const descriptionResource = await (await fetch(dru)).text()
 
   return webhookChannelTriple.subject.id
