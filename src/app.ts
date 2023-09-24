@@ -1,4 +1,5 @@
 import bodyParser from '@koa/bodyparser'
+import cors from '@koa/cors'
 import Router from '@koa/router'
 import Koa from 'koa'
 import helmet from 'koa-helmet'
@@ -24,6 +25,7 @@ router
 
 app
   .use(helmet())
+  .use(cors())
   .use(
     bodyParser({
       enableTypes: ['text', 'json'],
