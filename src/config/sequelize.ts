@@ -5,11 +5,11 @@ import {
   Model,
   Sequelize,
 } from 'sequelize'
+import { database } from '.'
 
 export const sequelize = new Sequelize({
-  dialect: 'sqlite',
-  // storage: 'database.sqlite', // Path to the SQLite database file (default is memory)
   logging: false,
+  ...database,
 })
 
 export class EmailVerification extends Model<
