@@ -1,4 +1,5 @@
 import { Middleware } from 'koa'
+import { emailSender } from '../config'
 import { Integration } from '../config/sequelize'
 import { sendMail } from '../services/mailerService'
 
@@ -20,6 +21,7 @@ export const webhookReceiver: Middleware = async ctx => {
     )
 
   await sendMail({
+    from: emailSender,
     to: integration.email,
     subject: 'TODO',
     html: 'TODO',

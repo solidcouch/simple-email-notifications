@@ -45,6 +45,7 @@ export const initializeIntegration: Middleware = async ctx => {
   }/verify-email?id=${encodeURIComponent(webId)}&token=${token}`
 
   await sendMail({
+    from: config.emailSender,
     to: email,
     subject: 'TODO',
     html: `Please verify your email <a href="${emailVerificationLink}">click here</a>`,
