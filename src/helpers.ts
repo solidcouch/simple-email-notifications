@@ -4,6 +4,7 @@ import {
   generateDpopKeyPair,
 } from '@inrupt/solid-client-authn-core'
 import { expect } from 'chai'
+import fetch from 'cross-fetch'
 import * as uuid from 'uuid'
 
 type Credentials = { email: string; password: string }

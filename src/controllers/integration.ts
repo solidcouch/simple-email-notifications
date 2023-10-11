@@ -1,4 +1,5 @@
 import { compare, hash } from 'bcryptjs'
+import fetch from 'cross-fetch'
 import crypto from 'crypto'
 import { Middleware } from 'koa'
 import { pick } from 'lodash'

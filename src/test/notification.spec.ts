@@ -1,5 +1,6 @@
 import { expect } from 'chai'
 import * as cheerio from 'cheerio'
+import fetch from 'cross-fetch'
 import { describe } from 'mocha'
 import Mail from 'nodemailer/lib/mailer'
 import { SinonSandbox, SinonSpy, createSandbox } from 'sinon'
