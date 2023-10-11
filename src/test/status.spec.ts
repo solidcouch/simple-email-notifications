@@ -3,14 +3,12 @@ import * as cheerio from 'cheerio'
 import { describe } from 'mocha'
 import Mail from 'nodemailer/lib/mailer'
 import { SinonSandbox, SinonSpy, createSandbox } from 'sinon'
-import { promisify } from 'util'
 import { baseUrl } from '../config'
-import { getAuthenticatedFetch } from '../helpers'
 import * as mailerService from '../services/mailerService'
 import { addRead, setupInbox } from '../setup'
 import { authenticatedFetch, person } from './testSetup.spec'
 
-describe('received notification via /webhook-receiver', () => {
+describe('get info about integrations of current person with GET /status', () => {
   let sendMailSpy: SinonSpy<[options: Mail.Options], Promise<void>>
   let verificationLink: string
   let sandbox: SinonSandbox
@@ -27,12 +25,12 @@ describe('received notification via /webhook-receiver', () => {
   beforeEach(async () => {
     await setupInbox({
       webId: person.webId,
-      inbox: person.podUrl + 'inbox/',
+      inbox: `${person.podUrl}inbox/`,
       authenticatedFetch,
     })
 
     await addRead({
-      resource: person.podUrl + 'inbox/',
+      resource: `${person.podUrl}inbox/`,
       agent: 'http://localhost:3456/bot/profile/card#me',
       authenticatedFetch,
     })
@@ -52,7 +50,7 @@ describe('received notification via /webhook-receiver', () => {
         '@id': '',
         '@type': 'Add',
         actor: person.webId,
-        object: person.podUrl + 'inbox/',
+        object: `${person.podUrl}inbox/`,
         target: 'email@example.com',
       }),
     })
@@ -63,45 +61,50 @@ describe('received notification via /webhook-receiver', () => {
     const $ = cheerio.load(emailMessage)
     verificationLink = $('a').first().attr('href') as string
     expect(verificationLink).to.not.be.null
+  })
 
+  it('[not authenticated] should fail with 401', async () => {
+    const response = await fetch(`${baseUrl}/status`)
+    expect(response.status).to.equal(401)
+  })
+
+  it('should show list of resources (inboxes) current user is observing', async () => {
     // finish the integration
     const finishResponse = await fetch(verificationLink)
     expect(finishResponse.status).to.equal(200)
-  })
 
-  it('[everything ok] should send email to email address when notifiation arrives', async function () {
-    this.timeout(10000)
-    // create notification in inbox of person2
-    const authenticatedPerson2Fetch = await getAuthenticatedFetch({
-      email: 'person2@example',
-      password: 'password',
-      solidServer: 'http://localhost:3456',
-    })
-    const addToInboxResponse = await authenticatedPerson2Fetch(
-      person.podUrl + 'inbox/',
-      {
-        method: 'POST',
-        headers: {
-          'content-type': 'text/turtle',
-          body: '<https://example.com/subject> <https://example.com/predicate> <https://example.com/object>.',
+    const response = await authenticatedFetch(`${baseUrl}/status`)
+    expect(response.status).to.equal(200)
+
+    const body = await response.json()
+
+    expect(body).to.deep.equal({
+      actor: person.webId,
+      integrations: [
+        {
+          object: `${person.podUrl}inbox/`,
+          target: 'email@example.com',
+          verified: true,
         },
-      },
-    )
-
-    expect(addToInboxResponse.ok).to.be.true
-
-    // let's wait a bit
-    // TODO this should be improved. waiting without knowing how long isn't great
-    await promisify(setTimeout)(2000)
-
-    expect(sendMailSpy.callCount).to.equal(2)
-    const emailNotification = sendMailSpy.secondCall.firstArg
-
-    expect(emailNotification).to.exist
-    expect(emailNotification.to).to.equal('email@example.com')
-
-    // TODO
+      ],
+    })
   })
 
-  it('[irrelevant update] should do nothing')
+  it('should show unverified integrations', async () => {
+    const response = await authenticatedFetch(`${baseUrl}/status`)
+    expect(response.status).to.equal(200)
+
+    const body = await response.json()
+
+    expect(body).to.deep.equal({
+      actor: person.webId,
+      integrations: [
+        {
+          object: `${person.podUrl}inbox/`,
+          target: 'email@example.com',
+          verified: false,
+        },
+      ],
+    })
+  })
 })

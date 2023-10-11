@@ -8,6 +8,7 @@ import {
   finishIntegration,
   initializeIntegration,
 } from './controllers/integration'
+import { getStatus } from './controllers/status'
 import { webhookReceiver } from './controllers/webhookReceiver'
 import { solidAuth } from './middlewares/solidAuth'
 
@@ -22,6 +23,7 @@ router
   .post('/inbox', solidAuth, initializeIntegration)
   .get('/verify-email', checkVerificationLink, finishIntegration)
   .post('/webhook-receiver', webhookReceiver)
+  .get('/status', solidAuth, getStatus)
 
 app
   .use(helmet())

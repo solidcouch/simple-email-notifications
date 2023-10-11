@@ -3,11 +3,19 @@ import { IncomingMessage, Server, ServerResponse } from 'http'
 import MailDev from 'maildev'
 import app from '../app'
 import { port } from '../config'
-import { EmailVerification } from '../config/sequelize'
-import { getAuthenticatedFetch } from '../helpers'
+import { EmailVerification, Integration } from '../config/sequelize'
+import { createRandomAccount, getAuthenticatedFetch } from '../helpers'
 
 let server: Server<typeof IncomingMessage, typeof ServerResponse>
 let authenticatedFetch: typeof fetch
+let person: {
+  idp: string
+  podUrl: string
+  webId: string
+  username: string
+  password: string
+  email: string
+}
 let cssServer: css.App
 
 before(async function () {
@@ -37,13 +45,8 @@ before(async function () {
 
   // eslint-disable-next-line no-console
   console.log('CSS server started in', (Date.now() - start) / 1000, 'seconds')
-
-  authenticatedFetch = await getAuthenticatedFetch({
-    email: 'person@example',
-    password: 'password',
-    solidServer: 'http://localhost:3456',
-  })
 })
+
 after(async () => {
   await cssServer.stop()
 })
@@ -71,6 +74,19 @@ after(done => {
 // clear the database before each test
 beforeEach(async () => {
   await EmailVerification.destroy({ truncate: true })
+  await Integration.destroy({ truncate: true })
 })
 
-export { authenticatedFetch, cssServer, server }
+/**
+ * Before each test, create a new account and authenticate to it
+ */
+beforeEach(async () => {
+  person = await createRandomAccount({ solidServer: 'http://localhost:3456' })
+  authenticatedFetch = await getAuthenticatedFetch({
+    email: person.email,
+    password: person.password,
+    solidServer: 'http://localhost:3456',
+  })
+})
+
+export { authenticatedFetch, cssServer, person, server }

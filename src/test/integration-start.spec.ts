@@ -4,7 +4,7 @@ import Mail from 'nodemailer/lib/mailer'
 import { SinonSandbox, SinonSpy, createSandbox } from 'sinon'
 import { baseUrl } from '../config'
 import * as mailerService from '../services/mailerService'
-import { authenticatedFetch } from './testSetup.spec'
+import { authenticatedFetch, person } from './testSetup.spec'
 
 describe('Mailer integration via /inbox', () => {
   let sendMailSpy: SinonSpy<[options: Mail.Options], Promise<void>>
@@ -30,8 +30,8 @@ describe('Mailer integration via /inbox', () => {
         '@context': 'https://www.w3.org/ns/activitystreams',
         '@id': '',
         '@type': 'Add',
-        actor: 'http://localhost:3456/person/profile/card#me',
-        object: 'http://localhost:3456/person/inbox/',
+        actor: person.webId,
+        object: person.podUrl + 'inbox/',
         target: 'email@example.com',
       }),
     })
@@ -43,18 +43,10 @@ describe('Mailer integration via /inbox', () => {
     )
     expect(sendMailSpy.firstCall.firstArg)
       .to.haveOwnProperty('text')
-      .include(
-        `verify-email?id=${encodeURIComponent(
-          'http://localhost:3456/person/profile/card#me',
-        )}&token=`,
-      )
+      .include(`verify-email?id=${encodeURIComponent(person.webId)}&token=`)
     expect(sendMailSpy.firstCall.firstArg)
       .to.haveOwnProperty('html')
-      .include(
-        `verify-email?id=${encodeURIComponent(
-          'http://localhost:3456/person/profile/card#me',
-        )}&token=`,
-      )
+      .include(`verify-email?id=${encodeURIComponent(person.webId)}&token=`)
     expect(response.status).to.equal(200)
   })
 
@@ -67,8 +59,8 @@ describe('Mailer integration via /inbox', () => {
           '@context': 'https://www.w3.org/ns/activitystreams',
           '@id': '',
           '@type': 'Add',
-          actor: 'http://localhost:3456/person/profile/card#me',
-          object: 'http://localhost:3456/person/inbox/',
+          actor: person.webId,
+          object: person.podUrl + 'inbox/',
           target: 'email@example.com',
         }),
       })
@@ -87,7 +79,7 @@ describe('Mailer integration via /inbox', () => {
           '@id': '',
           '@type': 'Add',
           actor: 'http://localhost:3456/person2/profile/card#me',
-          object: 'http://localhost:3456/person/inbox/',
+          object: person.podUrl + 'inbox/',
           target: 'email2@example.com',
         }),
       })

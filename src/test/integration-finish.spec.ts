@@ -5,7 +5,7 @@ import Mail from 'nodemailer/lib/mailer'
 import { SinonSandbox, SinonSpy, createSandbox } from 'sinon'
 import { baseUrl } from '../config'
 import * as mailerService from '../services/mailerService'
-import { authenticatedFetch } from './testSetup.spec'
+import { authenticatedFetch, person } from './testSetup.spec'
 
 describe('email verification via /verify-email?id=webId&token=base64Token', () => {
   let sendMailSpy: SinonSpy<[options: Mail.Options], Promise<void>>
@@ -34,8 +34,8 @@ describe('email verification via /verify-email?id=webId&token=base64Token', () =
         '@context': 'https://www.w3.org/ns/activitystreams',
         '@id': '',
         '@type': 'Add',
-        actor: 'http://localhost:3456/person/profile/card#me',
-        object: 'http://localhost:3456/person/profile/card',
+        actor: person.webId,
+        object: person.podUrl + 'profile/card',
         target: 'email@example.com',
       }),
     })

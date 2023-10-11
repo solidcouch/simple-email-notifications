@@ -3,6 +3,8 @@ import {
   createDpopHeader,
   generateDpopKeyPair,
 } from '@inrupt/solid-client-authn-core'
+import { expect } from 'chai'
+import * as uuid from 'uuid'
 
 type Credentials = { email: string; password: string }
 
@@ -54,4 +56,59 @@ export const getAuthenticatedFetch = async ({
   // authFetch can now be used as a standard fetch function that will authenticate as your WebID.
 
   return authFetch
+}
+
+export const createAccount = async ({
+  username,
+  password,
+  email,
+  solidServer,
+}: {
+  username: string
+  password?: string
+  email?: string
+  solidServer: string
+}) => {
+  password ??= 'correcthorsebatterystaple'
+  email ??= username + '@example.org'
+  const config = {
+    idp: solidServer + '/',
+    podUrl: `${solidServer}/${username}/`,
+    webId: `${solidServer}/${username}/profile/card#me`,
+    username,
+    password,
+    email,
+  }
+  const registerEndpoint = solidServer + '/idp/register/'
+  const response = await fetch(registerEndpoint, {
+    method: 'post',
+    body: JSON.stringify({
+      email,
+      password,
+      confirmPassword: password,
+      createWebId: true,
+      register: true,
+      createPod: true,
+      rootPod: false,
+      podName: username,
+    }),
+    headers: { 'content-type': 'application/json' },
+  })
+
+  expect(response.ok).to.be.true
+
+  return config
+}
+
+export const createRandomAccount = ({
+  solidServer,
+}: {
+  solidServer: string
+}) => {
+  return createAccount({
+    username: uuid.v4(),
+    password: uuid.v4(),
+    email: uuid.v4() + '@example.com',
+    solidServer,
+  })
 }
