@@ -8,6 +8,7 @@ import { createRandomAccount, getAuthenticatedFetch } from '../helpers'
 
 let server: Server<typeof IncomingMessage, typeof ServerResponse>
 let authenticatedFetch: typeof fetch
+let authenticatedFetchNoNotifications: typeof fetch
 let person: {
   idp: string
   podUrl: string
@@ -16,7 +17,16 @@ let person: {
   password: string
   email: string
 }
+let personNoNotifications: {
+  idp: string
+  podUrl: string
+  webId: string
+  username: string
+  password: string
+  email: string
+}
 let cssServer: css.App
+let cssServerNoNotifications: css.App
 
 before(async function () {
   this.timeout(60000)
@@ -49,6 +59,39 @@ before(async function () {
 
 after(async () => {
   await cssServer.stop()
+})
+
+before(async function () {
+  this.timeout(60000)
+  const start = Date.now()
+
+  // eslint-disable-next-line no-console
+  console.log('Starting CSS server without notifications')
+  // Community Solid Server (CSS) set up following example in https://github.com/CommunitySolidServer/hello-world-component/blob/main/test/integration/Server.test.ts
+  cssServerNoNotifications = await new css.AppRunner().create(
+    {
+      mainModulePath: css.joinFilePath(__dirname, '../../'), // ?
+      typeChecking: false, // ?
+      dumpErrorState: false, // disable CSS error dump
+    },
+    css.joinFilePath(__dirname, './css-config-no-notifications.json'), // CSS config
+    {},
+    // CSS cli options
+    // https://github.com/CommunitySolidServer/CommunitySolidServer/tree/main#-parameters
+    {
+      port: 3457,
+      loggingLevel: 'off',
+      // seededPodConfigJson: css.joinFilePath(__dirname, './css-pod-seed.json'), // set up some Solid accounts
+    },
+  )
+  await cssServerNoNotifications.start()
+
+  // eslint-disable-next-line no-console
+  console.log('CSS server started in', (Date.now() - start) / 1000, 'seconds')
+})
+
+after(async () => {
+  await cssServerNoNotifications.stop()
 })
 
 before(done => {
@@ -89,4 +132,23 @@ beforeEach(async () => {
   })
 })
 
-export { authenticatedFetch, cssServer, person, server }
+beforeEach(async () => {
+  personNoNotifications = await createRandomAccount({
+    solidServer: 'http://localhost:3457',
+  })
+  authenticatedFetchNoNotifications = await getAuthenticatedFetch({
+    email: personNoNotifications.email,
+    password: personNoNotifications.password,
+    solidServer: 'http://localhost:3457',
+  })
+})
+
+export {
+  authenticatedFetch,
+  authenticatedFetchNoNotifications,
+  cssServer,
+  cssServerNoNotifications,
+  person,
+  personNoNotifications,
+  server,
+}

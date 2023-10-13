@@ -47,7 +47,7 @@ export const initializeIntegration: Middleware = async ctx => {
   await sendMail({
     from: config.emailSender,
     to: email,
-    subject: 'TODO',
+    subject: 'Verify your email for sleepy.bike notifications',
     html: `Please verify your email <a href="${emailVerificationLink}">click here</a>`,
     text: `Please verify your email ${emailVerificationLink}`,
   })
@@ -103,12 +103,18 @@ export const finishIntegration: Middleware = async ctx => {
   // save the integration to database
   await Integration.create(integrationData)
 
-  // subscribe to the inbox' webhook notifications
-  await subscribeForNotifications(integrationData.inbox)
-
-  ctx.response.body =
-    'Email notifications have been successfully integrated to your inbox'
-  ctx.response.status = 200
+  try {
+    // subscribe to the inbox' webhook notifications
+    await subscribeForNotifications(integrationData.inbox)
+    ctx.response.body =
+      'Email notifications have been successfully integrated to your inbox'
+  } catch (e) {
+    ctx.response.body =
+      "Email was successfully verified, but notifications won't work, yet. It looks like your Solid Pod doesn't support notifications. We'll implement a workaround in the future.\nError: " +
+      (e as Error).message
+  } finally {
+    ctx.response.status = 200
+  }
 }
 
 type Fetch = typeof fetch

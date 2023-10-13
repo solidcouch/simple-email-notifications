@@ -6,7 +6,12 @@ import Mail from 'nodemailer/lib/mailer'
 import { SinonSandbox, SinonSpy, createSandbox } from 'sinon'
 import { baseUrl } from '../config'
 import * as mailerService from '../services/mailerService'
-import { authenticatedFetch, person } from './testSetup.spec'
+import {
+  authenticatedFetch,
+  authenticatedFetchNoNotifications,
+  person,
+  personNoNotifications,
+} from './testSetup.spec'
 
 describe('email verification via /verify-email?id=webId&token=base64Token', () => {
   let sendMailSpy: SinonSpy<[options: Mail.Options], Promise<void>>
@@ -85,4 +90,39 @@ describe('email verification via /verify-email?id=webId&token=base64Token', () =
   })
 
   it('when we send out multiple verification emails, the last link should work')
+
+  context("server doesn't support webhook notifications", () => {
+    beforeEach(async () => {
+      // initialize the integration
+      const initResponse = await authenticatedFetchNoNotifications(
+        `${baseUrl}/inbox`,
+        {
+          method: 'post',
+          headers: {
+            'content-type':
+              'application/ld+json;profile="https://www.w3.org/ns/activitystreams"',
+          },
+          body: JSON.stringify({
+            '@context': 'https://www.w3.org/ns/activitystreams',
+            '@id': '',
+            '@type': 'Add',
+            actor: personNoNotifications.webId,
+            object: personNoNotifications.podUrl + 'profile/card',
+            target: 'email@example.com',
+          }),
+        },
+      )
+
+      expect(initResponse.status).to.equal(200)
+      // email was sent
+      const emailMessage = sendMailSpy.secondCall.firstArg.html
+      const $ = cheerio.load(emailMessage)
+      verificationLink = $('a').first().attr('href') as string
+      expect(verificationLink).to.not.be.null
+    })
+    it("should verify email, but inform user that notifications aren't supported", async () => {
+      const response = await fetch(verificationLink)
+      expect(response.status).to.equal(200)
+    })
+  })
 })
