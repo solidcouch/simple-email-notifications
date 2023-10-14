@@ -46,6 +46,8 @@
     "@koa/cors": "^4.0.0",
     "@koa/router": "^12.0.0",
     "@solid/access-token-verifier": "^2.0.5",
+    "ajv": "^8.12.0",
+    "ajv-formats": "^2.1.1",
     "bcryptjs": "^2.4.3",
     "cross-fetch": "^4.0.0",
     "dotenv": "^16.0.0",

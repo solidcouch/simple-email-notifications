@@ -51,6 +51,26 @@ describe('Mailer integration via /inbox', () => {
     expect(response.status).to.equal(200)
   })
 
+  it('[invalid request body] should respond with 400', async () => {
+    const response = await authenticatedFetch(`${baseUrl}/inbox`, {
+      method: 'post',
+      headers: {
+        'content-type':
+          'application/ld+json;profile="https://www.w3.org/ns/activitystreams"',
+      },
+      body: JSON.stringify({
+        '@context': 'https://www.w3.org/ns/activitystrams',
+        '@id': '',
+        '@type': 'ads',
+        actor: 'asdf',
+        object: '/inbox',
+        target: 'yay',
+      }),
+    })
+
+    expect(response.status).to.equal(400)
+  })
+
   context('person not signed in', () => {
     it('should respond with 401', async () => {
       const response = await fetch(`${baseUrl}/inbox`, {
@@ -87,16 +107,6 @@ describe('Mailer integration via /inbox', () => {
 
       expect(response.status).to.equal(403)
     })
-  })
-
-  it('should check that the person requesting is the authenticated person', async () => {
-    const response = await authenticatedFetch(`${baseUrl}/inbox`, {
-      method: 'post',
-      headers: { 'content-type': 'application/ld+json' },
-      body: JSON.stringify({}),
-    })
-
-    expect(response.status).to.equal(403)
   })
 
   it(
