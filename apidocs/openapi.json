@@ -1,0 +1,96 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "Solid Email Notifications",
+    "description": "Hello world! This is a Solid email notifier. Read more at https://github.com/OpenHospitalityNetwork/solid-email-notifications"
+  },
+  "servers": [
+    {
+      "url": "/"
+    }
+  ],
+  "paths": {
+    "/inbox": {
+      "post": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "@context": {
+                    "const": "https://www.w3.org/ns/activitystreams"
+                  },
+                  "@id": {
+                    "type": "string"
+                  },
+                  "@type": {
+                    "const": "Add"
+                  },
+                  "actor": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "object": {
+                    "type": "string",
+                    "format": "uri"
+                  },
+                  "target": {
+                    "type": "string",
+                    "format": "email"
+                  }
+                },
+                "required": [
+                  "@context",
+                  "@type",
+                  "actor",
+                  "object",
+                  "target"
+                ],
+                "additionalProperties": false
+              }
+            }
+          }
+        }
+      }
+    },
+    "/verify-email": {
+      "get": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/webhook-receiver": {
+      "post": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/status": {
+      "get": {
+        "description": "",
+        "responses": {
+          "default": {
+            "description": ""
+          }
+        }
+      }
+    }
+  }
+}

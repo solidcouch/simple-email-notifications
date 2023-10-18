@@ -3,6 +3,7 @@ import cors from '@koa/cors'
 import Router from '@koa/router'
 import Koa from 'koa'
 import helmet from 'koa-helmet'
+import serve from 'koa-static'
 import {
   checkVerificationLink,
   finishIntegration,
@@ -17,13 +18,31 @@ const app = new Koa()
 const router = new Router()
 
 router
-  .get('/', ctx => {
-    ctx.response.body =
-      'Hello world! This is a Solid email notifier. Read more at https://github.com/openHospitalityNetwork/solid-email-notifications'
-  })
   .post(
     '/inbox',
     solidAuth,
+    /*
+    #swagger.requestBody = {
+      required: true,
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object',
+            properties: {
+              '@context': { const: 'https://www.w3.org/ns/activitystreams' },
+              '@id': { type: 'string' },
+              '@type': { const: 'Add' },
+              actor: { type: 'string', format: 'uri' },
+              object: { type: 'string', format: 'uri' },
+              target: { type: 'string', format: 'email' },
+            },
+            required: ['@context', '@type', 'actor', 'object', 'target'],
+            additionalProperties: false,
+          },
+        },
+      },
+    }
+    */
     validateBody({
       type: 'object',
       properties: {
@@ -55,6 +74,7 @@ app
       },
     }),
   )
+  .use(serve('./apidocs'))
   .use(router.routes())
   .use(router.allowedMethods())
 
