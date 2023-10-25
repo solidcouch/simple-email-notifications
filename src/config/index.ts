@@ -52,3 +52,5 @@ export const database: Options = {
   host: process.env.DB_HOST || undefined,
   port: process.env.DB_PORT ? +process.env.DB_PORT : undefined,
 }
+
+export const isBehindProxy = stringToBoolean(process.env.BEHIND_PROXY)
