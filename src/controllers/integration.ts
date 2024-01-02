@@ -1,13 +1,13 @@
 import { compare, hash } from 'bcryptjs'
 import fetch from 'cross-fetch'
 import crypto from 'crypto'
+import { getAuthenticatedFetch } from 'css-authn/dist/7.x'
 import { Middleware } from 'koa'
 import { pick } from 'lodash'
 import n3 from 'n3'
 import parseLinkHeader from 'parse-link-header'
 import * as config from '../config'
 import { EmailVerification, Integration } from '../config/sequelize'
-import { getAuthenticatedFetch } from '../helpers'
 import { sendMail } from '../services/mailerService'
 
 export const initializeIntegration: Middleware = async ctx => {

@@ -1,12 +1,12 @@
 import { expect } from 'chai'
 import * as cheerio from 'cheerio'
 import fetch from 'cross-fetch'
+import { getAuthenticatedFetch } from 'css-authn/dist/7.x'
 import { describe } from 'mocha'
 import Mail from 'nodemailer/lib/mailer'
 import { SinonSandbox, SinonSpy, createSandbox } from 'sinon'
 import { promisify } from 'util'
 import { baseUrl } from '../config'
-import { getAuthenticatedFetch } from '../helpers'
 import * as mailerService from '../services/mailerService'
 import { addRead, setupInbox } from '../setup'
 import { authenticatedFetch, person } from './testSetup.spec'
@@ -76,7 +76,7 @@ describe('received notification via /webhook-receiver', () => {
     const authenticatedPerson2Fetch = await getAuthenticatedFetch({
       email: 'person2@example',
       password: 'password',
-      solidServer: 'http://localhost:3456',
+      provider: 'http://localhost:3456',
     })
     const addToInboxResponse = await authenticatedPerson2Fetch(
       person.podUrl + 'inbox/',

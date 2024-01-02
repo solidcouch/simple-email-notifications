@@ -12,7 +12,7 @@ export const baseUrl = process.env.BASE_URL ?? 'http://localhost:3005'
 export const mailerCredentials = {
   email: process.env.MAILER_IDENTITY_EMAIL ?? 'bot@example',
   password: process.env.MAILER_IDENTITY_PASSWORD ?? 'password',
-  solidServer: process.env.MAILER_IDENTITY_PROVIDER ?? 'http://localhost:3456',
+  provider: process.env.MAILER_IDENTITY_PROVIDER ?? 'http://localhost:3456',
 }
 
 const stringToBoolean = (value: string | undefined): boolean => {

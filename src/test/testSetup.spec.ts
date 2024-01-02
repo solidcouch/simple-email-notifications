@@ -1,10 +1,11 @@
 import * as css from '@solid/community-server'
+import { getAuthenticatedFetch } from 'css-authn/dist/7.x'
 import { IncomingMessage, Server, ServerResponse } from 'http'
 import MailDev from 'maildev'
 import app from '../app'
 import { port } from '../config'
 import { EmailVerification, Integration } from '../config/sequelize'
-import { createRandomAccount, getAuthenticatedFetch } from '../helpers'
+import { createRandomAccount } from '../helpers'
 
 let server: Server<typeof IncomingMessage, typeof ServerResponse>
 let authenticatedFetch: typeof fetch
@@ -35,22 +36,22 @@ before(async function () {
   // eslint-disable-next-line no-console
   console.log('Starting CSS server')
   // Community Solid Server (CSS) set up following example in https://github.com/CommunitySolidServer/hello-world-component/blob/main/test/integration/Server.test.ts
-  cssServer = await new css.AppRunner().create(
-    {
+  cssServer = await new css.AppRunner().create({
+    loaderProperties: {
       mainModulePath: css.joinFilePath(__dirname, '../../'), // ?
       typeChecking: false, // ?
       dumpErrorState: false, // disable CSS error dump
     },
-    css.joinFilePath(__dirname, './css-default-config.json'), // CSS config
-    {},
+    config: css.joinFilePath(__dirname, './css-default-config.json'), // CSS config
+    variableBindings: {},
     // CSS cli options
     // https://github.com/CommunitySolidServer/CommunitySolidServer/tree/main#-parameters
-    {
+    shorthand: {
       port: 3456,
       loggingLevel: 'off',
-      seededPodConfigJson: css.joinFilePath(__dirname, './css-pod-seed.json'), // set up some Solid accounts
+      seedConfig: css.joinFilePath(__dirname, './css-pod-seed.json'), // set up some Solid accounts
     },
-  )
+  })
   await cssServer.start()
 
   // eslint-disable-next-line no-console
@@ -68,22 +69,22 @@ before(async function () {
   // eslint-disable-next-line no-console
   console.log('Starting CSS server without notifications')
   // Community Solid Server (CSS) set up following example in https://github.com/CommunitySolidServer/hello-world-component/blob/main/test/integration/Server.test.ts
-  cssServerNoNotifications = await new css.AppRunner().create(
-    {
+  cssServerNoNotifications = await new css.AppRunner().create({
+    loaderProperties: {
       mainModulePath: css.joinFilePath(__dirname, '../../'), // ?
       typeChecking: false, // ?
       dumpErrorState: false, // disable CSS error dump
     },
-    css.joinFilePath(__dirname, './css-config-no-notifications.json'), // CSS config
-    {},
+    config: css.joinFilePath(__dirname, './css-config-no-notifications.json'), // CSS config
+    variableBindings: {},
     // CSS cli options
     // https://github.com/CommunitySolidServer/CommunitySolidServer/tree/main#-parameters
-    {
+    shorthand: {
       port: 3457,
       loggingLevel: 'off',
       // seededPodConfigJson: css.joinFilePath(__dirname, './css-pod-seed.json'), // set up some Solid accounts
     },
-  )
+  })
   await cssServerNoNotifications.start()
 
   // eslint-disable-next-line no-console
@@ -128,7 +129,7 @@ beforeEach(async () => {
   authenticatedFetch = await getAuthenticatedFetch({
     email: person.email,
     password: person.password,
-    solidServer: 'http://localhost:3456',
+    provider: 'http://localhost:3456',
   })
 })
 
@@ -139,7 +140,7 @@ beforeEach(async () => {
   authenticatedFetchNoNotifications = await getAuthenticatedFetch({
     email: personNoNotifications.email,
     password: personNoNotifications.password,
-    solidServer: 'http://localhost:3457',
+    provider: 'http://localhost:3457',
   })
 })
 

@@ -1,5 +1,17 @@
 [
-  { "podName": "bot", "email": "bot@example", "password": "password" },
-  { "podName": "person", "email": "person@example", "password": "password" },
-  { "podName": "person2", "email": "person2@example", "password": "password" }
+  {
+    "email": "bot@example",
+    "password": "password",
+    "pods": [{ "name": "bot" }]
+  },
+  {
+    "email": "person@example",
+    "password": "password",
+    "pods": [{ "name": "person" }]
+  },
+  {
+    "email": "person2@example",
+    "password": "password",
+    "pods": [{ "name": "person2" }]
+  }
 ]
