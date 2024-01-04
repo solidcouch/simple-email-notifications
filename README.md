@@ -1,20 +1,15 @@
-# Solid email notifications
+# Simple Solid email notifications
 
-This service sends you an email when a new notification arrives to your Solid Pod inbox
+This service sends email from one person within a Solid group to another. It doesn't use native Solid notifications, because there are pods that don't support it.
 
 ## How it works
 
 - It's a bot agent with its own identity, which must be provided by arbitrary CommunitySolidServer pod
 - It runs on a server
-- At the beginning of the integration, the bot's webId must be given Read access to your inbox (frontend app can take care of this by editing inbox's .acl (access control list))
-- You have to prove that the inbox belongs to you (how to prove that? not implemented, yet)
-- You have to tell the service where to send you emails
-  - in the future, the email address might be stored in your pod; for now we keep it in internal database
-- You receive email with verification link and follow the link
-- The service then subscribes to Solid [webhook](https://solid.github.io/notifications/webhook-channel-2023) [notifications](https://solidproject.org/TR/notifications-protocol) of your inbox
-- When a notification arrives to your inbox, this agent gets notified by the webhook and sends you email via a configured email service. In the future it will also check whether it's a notification about something specific (in the context of sleepy.bike e.g. message or contact request), it'll compose the message and send it to you
-- It will regularly re-subscribe to your inbox because some Solid pods drop the subscription regularly (not implemented, yet)
-- If your pod doesn't support webhook notifications, maybe this bot will check your inbox regularly (a few times per day) and send you a notification when it finds something new there (not implemented, yet)
+- You can check whether another person in the group has set up email notifications.
+- If the other person has set up the notifications, you can send them an email through this service.
+- At the beginning, you need to verify your email, save it into your hospitality exchange settings, and give the mailer a permission to read the email; so the email notifier can access the settings when it sends you an email.
+- When you want to notify other person, the service will check whether both of you belong to the specified group(s). If you both belong, and the other person has email notifications set up, it will send the other person an email.
 
 ## Usage
 
@@ -37,24 +32,6 @@ yarn start
 ### Use
 
 Service API is documented in [OpenAPI schema](./apidocs/openapi.json) (still work in progress). When you run the app with `yarn start`, you'll see the Swagger-UI documentation at `/`.
-
-To integrate this service with person's inbox, the mailer identity needs to be given Read access to that inbox. You can do it via a frontend app, or manually by updating inbox acl.
-
-#### GET /status
-
-See whether the current user has integrated inbox with the service
-
-#### POST /inbox
-
-Integrate person's inbox with the service
-
-#### GET /verify-email
-
-Verify email during integration
-
-#### POST /webhook-receiver
-
-Listen to webhook notifications coming from Solid pod when inbox changes
 
 ## Tests
 
