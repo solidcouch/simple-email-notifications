@@ -39,8 +39,8 @@ export const emailSender = process.env.EMAIL_SENDER
 
 export const port: number = +(process.env.PORT ?? 3005)
 
-// email verification expiration in milliseconds (1 hour)
-export const emailVerificationExpiration = 3600 * 1000
+// email verification expiration in seconds (1 hour)
+export const emailVerificationExpiration = 3600
 
 // configuration of database in form of sequelize options
 export const database: Options = {
@@ -54,3 +54,17 @@ export const database: Options = {
 }
 
 export const isBehindProxy = stringToBoolean(process.env.BEHIND_PROXY)
+
+const stringToArray = (value: string | undefined) => {
+  if (!value) return []
+  return value.split(/\s*,\s*/)
+}
+
+export const allowedGroups = stringToArray(
+  process.env.ALLOWED_GROUPS ?? 'https://example.com#us',
+)
+
+export const jwt = {
+  key: process.env.JWT_KEY ?? './ecdsa-p256-private.pem',
+  alg: process.env.JWT_ALG ?? 'ES256',
+}

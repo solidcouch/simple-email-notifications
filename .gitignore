@@ -4,3 +4,5 @@ output
 node_modules
 
 database.sqlite
+
+*.pem

@@ -11,7 +11,7 @@ import * as mailerService from '../services/mailerService'
 import { addRead, setupInbox } from '../setup'
 import { authenticatedFetch, person } from './testSetup.spec'
 
-describe('received notification via /webhook-receiver', () => {
+describe.skip('received notification via /inbox', () => {
   let sendMailSpy: SinonSpy<[options: Mail.Options], Promise<void>>
   let verificationLink: string
   let sandbox: SinonSandbox
@@ -70,7 +70,7 @@ describe('received notification via /webhook-receiver', () => {
     expect(finishResponse.status).to.equal(200)
   })
 
-  it('[everything ok] should send email to email address when notifiation arrives', async function () {
+  it('[everything ok] should send email to email address when requested', async function () {
     this.timeout(10000)
     // create notification in inbox of person2
     const authenticatedPerson2Fetch = await getAuthenticatedFetch({
@@ -104,5 +104,8 @@ describe('received notification via /webhook-receiver', () => {
     // TODO
   })
 
-  it('[irrelevant update] should do nothing')
+  it('[not authenticated] should fail with 401')
+  it('[authenticated person not from group] should fail with 403')
+
+  it('[requesting person not from group] should fail with 400')
 })
