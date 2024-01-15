@@ -13,6 +13,9 @@ export const mailerCredentials = {
   email: process.env.MAILER_IDENTITY_EMAIL ?? 'bot@example',
   password: process.env.MAILER_IDENTITY_PASSWORD ?? 'password',
   provider: process.env.MAILER_IDENTITY_PROVIDER ?? 'http://localhost:3456',
+  webId:
+    process.env.MAILER_IDENTITY_WEBID ??
+    'http://localhost:3456/bot/profile/card#me',
 }
 
 const stringToBoolean = (value: string | undefined): boolean => {

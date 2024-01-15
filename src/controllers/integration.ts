@@ -18,10 +18,16 @@ export const initializeIntegration: Middleware = async ctx => {
   const tokenExpiration = config.emailVerificationExpiration
 
   const pem = await readFile(config.jwt.key, { encoding: 'utf-8' })
-  const jwt = jsonwebtoken.sign({ webId: user, email }, pem, {
-    algorithm: 'ES256',
-    expiresIn: tokenExpiration,
-  })
+  const jwt = jsonwebtoken.sign(
+    {
+      webId: user,
+      email,
+      emailVerified: false,
+      iss: config.mailerCredentials.webId,
+    },
+    pem,
+    { algorithm: 'ES256', expiresIn: tokenExpiration },
+  )
 
   const emailVerificationLink = `${config.baseUrl}/verify-email?token=${jwt}`
 
@@ -49,6 +55,8 @@ export const checkVerificationLink: Middleware = async (ctx, next) => {
     const payload = jsonwebtoken.verify(jwt, pem) as {
       webId: string
       email: string
+      emailVerified: boolean
+      iss: string
       iat: number
       exp: number
     }
@@ -73,7 +81,11 @@ export const finishIntegration: Middleware = async ctx => {
   }
 
   const pem = await readFile(config.jwt.key, { encoding: 'utf-8' })
-  const jwt = jsonwebtoken.sign({ webId, email }, pem, { algorithm: 'ES256' })
+  const jwt = jsonwebtoken.sign(
+    { webId, email, emailVerified: true, iss: config.mailerCredentials.webId },
+    pem,
+    { algorithm: 'ES256' },
+  )
   ctx.response.body = jwt
   ctx.set('content-type', 'text/plain')
   ctx.response.status = 200
