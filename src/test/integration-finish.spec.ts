@@ -1,19 +1,15 @@
 import { expect } from 'chai'
 import * as cheerio from 'cheerio'
 import fetch from 'cross-fetch'
+import * as jsonwebtoken from 'jsonwebtoken'
 import { describe } from 'mocha'
 import Mail from 'nodemailer/lib/mailer'
 import { SinonSandbox, SinonSpy, createSandbox } from 'sinon'
-import { baseUrl } from '../config'
+import * as config from '../config'
 import * as mailerService from '../services/mailerService'
-import {
-  authenticatedFetch,
-  authenticatedFetchNoNotifications,
-  person,
-  personNoNotifications,
-} from './testSetup.spec'
+import { authenticatedFetch, person } from './testSetup.spec'
 
-describe('email verification via /verify-email?id=webId&token=base64Token', () => {
+describe('email verification via /verify-email?token=jwt', () => {
   let sendMailSpy: SinonSpy<[options: Mail.Options], Promise<void>>
   let verificationLink: string
   let sandbox: SinonSandbox
@@ -30,20 +26,10 @@ describe('email verification via /verify-email?id=webId&token=base64Token', () =
 
   beforeEach(async () => {
     // initialize the integration
-    const initResponse = await authenticatedFetch(`${baseUrl}/inbox`, {
+    const initResponse = await authenticatedFetch(`${config.baseUrl}/init`, {
       method: 'post',
-      headers: {
-        'content-type':
-          'application/ld+json;profile="https://www.w3.org/ns/activitystreams"',
-      },
-      body: JSON.stringify({
-        '@context': 'https://www.w3.org/ns/activitystreams',
-        '@id': '',
-        '@type': 'Add',
-        actor: person.webId,
-        object: person.podUrl + 'profile/card',
-        target: 'email@example.com',
-      }),
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ email: 'email@example.com' }),
     })
 
     expect(initResponse.status).to.equal(200)
@@ -54,27 +40,38 @@ describe('email verification via /verify-email?id=webId&token=base64Token', () =
     expect(verificationLink).to.not.be.null
   })
 
-  it('[correct token] should finish the integration of webId + inbox + email and respond 200', async () => {
+  it('[correct token] should respond with 200', async () => {
     const response = await fetch(verificationLink)
     expect(response.status).to.equal(200)
   })
 
-  it('[incorrect token] should respond with 400', async () => {
-    const response = await fetch(verificationLink.slice(0, -2))
-    expect(response.status).to.equal(400)
-    expect(await response.text()).to.equal('Verification link is invalid')
+  it('[correct token] should return proof of verification for the user to save on their pod', async () => {
+    // the proof is a JWT token, it keeps email and webId of the person as payload
+    const response = await fetch(verificationLink)
+    expect(response.ok).to.be.true
+    const jwt = await response.text()
+    const payload = jsonwebtoken.decode(jwt) as jsonwebtoken.JwtPayload
+
+    expect(payload).to.include({
+      iss: config.mailerCredentials.webId,
+      webId: person.webId,
+      email: 'email@example.com',
+      emailVerified: true,
+    })
   })
 
-  it('[integration for webId not started] should respond with 400', async () => {
+  it("[correct token] (maybe) should save the verification proof to user's pod")
+
+  it('[incorrect token] should respond with 400', async () => {
     const response = await fetch(
-      `${baseUrl}/verify-email?id=asdf&token=12345678`,
+      verificationLink.slice(0, -32) + '0'.repeat(32),
     )
     expect(response.status).to.equal(400)
     expect(await response.text()).to.equal('Verification link is invalid')
   })
 
-  it('[missing id or token] should respond with 400', async () => {
-    const response = await fetch(`${baseUrl}/verify-email`)
+  it('[missing token] should respond with 400', async () => {
+    const response = await fetch(`${config.baseUrl}/verify-email`)
     expect(response.status).to.equal(400)
     expect(await response.text()).to.equal(
       'This is not a valid verification link. Have you received the link in your email?',
@@ -87,42 +84,5 @@ describe('email verification via /verify-email?id=webId&token=base64Token', () =
     // wait one hour and one second
     expect(response.status).to.equal(400)
     expect(await response.text()).to.equal('Verification link is expired')
-  })
-
-  it('when we send out multiple verification emails, the last link should work')
-
-  context("server doesn't support webhook notifications", () => {
-    beforeEach(async () => {
-      // initialize the integration
-      const initResponse = await authenticatedFetchNoNotifications(
-        `${baseUrl}/inbox`,
-        {
-          method: 'post',
-          headers: {
-            'content-type':
-              'application/ld+json;profile="https://www.w3.org/ns/activitystreams"',
-          },
-          body: JSON.stringify({
-            '@context': 'https://www.w3.org/ns/activitystreams',
-            '@id': '',
-            '@type': 'Add',
-            actor: personNoNotifications.webId,
-            object: personNoNotifications.podUrl + 'profile/card',
-            target: 'email@example.com',
-          }),
-        },
-      )
-
-      expect(initResponse.status).to.equal(200)
-      // email was sent
-      const emailMessage = sendMailSpy.secondCall.firstArg.html
-      const $ = cheerio.load(emailMessage)
-      verificationLink = $('a').first().attr('href') as string
-      expect(verificationLink).to.not.be.null
-    })
-    it("should verify email, but inform user that notifications aren't supported", async () => {
-      const response = await fetch(verificationLink)
-      expect(response.status).to.equal(200)
-    })
   })
 })

@@ -1,7 +1,10 @@
 import * as css from '@solid/community-server'
+import fetch from 'cross-fetch'
 import { getAuthenticatedFetch } from 'css-authn/dist/7.x'
 import { IncomingMessage, Server, ServerResponse } from 'http'
 import MailDev from 'maildev'
+import { HttpResponse, http } from 'msw'
+import { SetupServer, setupServer } from 'msw/node'
 import app from '../app'
 import { port } from '../config'
 import { EmailVerification, Integration } from '../config/sequelize'
@@ -9,7 +12,7 @@ import { createRandomAccount } from '../helpers'
 
 let server: Server<typeof IncomingMessage, typeof ServerResponse>
 let authenticatedFetch: typeof fetch
-let authenticatedFetchNoNotifications: typeof fetch
+let otherAuthenticatedFetch: typeof fetch
 let person: {
   idp: string
   podUrl: string
@@ -18,7 +21,7 @@ let person: {
   password: string
   email: string
 }
-let personNoNotifications: {
+let otherPerson: {
   idp: string
   podUrl: string
   webId: string
@@ -27,7 +30,7 @@ let personNoNotifications: {
   email: string
 }
 let cssServer: css.App
-let cssServerNoNotifications: css.App
+let mockServer: SetupServer
 
 before(async function () {
   this.timeout(60000)
@@ -60,39 +63,6 @@ before(async function () {
 
 after(async () => {
   await cssServer.stop()
-})
-
-before(async function () {
-  this.timeout(60000)
-  const start = Date.now()
-
-  // eslint-disable-next-line no-console
-  console.log('Starting CSS server without notifications')
-  // Community Solid Server (CSS) set up following example in https://github.com/CommunitySolidServer/hello-world-component/blob/main/test/integration/Server.test.ts
-  cssServerNoNotifications = await new css.AppRunner().create({
-    loaderProperties: {
-      mainModulePath: css.joinFilePath(__dirname, '../../'), // ?
-      typeChecking: false, // ?
-      dumpErrorState: false, // disable CSS error dump
-    },
-    config: css.joinFilePath(__dirname, './css-config-no-notifications.json'), // CSS config
-    variableBindings: {},
-    // CSS cli options
-    // https://github.com/CommunitySolidServer/CommunitySolidServer/tree/main#-parameters
-    shorthand: {
-      port: 3457,
-      loggingLevel: 'off',
-      // seededPodConfigJson: css.joinFilePath(__dirname, './css-pod-seed.json'), // set up some Solid accounts
-    },
-  })
-  await cssServerNoNotifications.start()
-
-  // eslint-disable-next-line no-console
-  console.log('CSS server started in', (Date.now() - start) / 1000, 'seconds')
-})
-
-after(async () => {
-  await cssServerNoNotifications.stop()
 })
 
 before(done => {
@@ -131,25 +101,45 @@ beforeEach(async () => {
     password: person.password,
     provider: 'http://localhost:3456',
   })
+
+  otherPerson = await createRandomAccount({
+    solidServer: 'http://localhost:3456',
+  })
+  otherAuthenticatedFetch = await getAuthenticatedFetch({
+    email: otherPerson.email,
+    password: otherPerson.password,
+    provider: 'http://localhost:3456',
+  })
 })
 
+// Enable request interception.
 beforeEach(async () => {
-  personNoNotifications = await createRandomAccount({
-    solidServer: 'http://localhost:3457',
-  })
-  authenticatedFetchNoNotifications = await getAuthenticatedFetch({
-    email: personNoNotifications.email,
-    password: personNoNotifications.password,
-    provider: 'http://localhost:3457',
-  })
+  mockServer = setupServer(
+    // Describe network behavior with request handlers.
+    // Tip: move the handlers into their own module and
+    // import it across your browser and Node.js setups!
+    http.get('https://example.com/', (/*{ request, params, cookies }*/) => {
+      return HttpResponse.text(`
+          @prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
+          <#us> vcard:hasMember <${person.webId}> .
+          `)
+    }),
+  )
+  mockServer.listen({ onUnhandledRequest() {} }) // quiet the unhandled request warnings
+})
+
+// Reset handlers so that each test could alter them
+// without affecting other, unrelated tests.
+afterEach(() => {
+  mockServer.resetHandlers()
+  mockServer.close()
 })
 
 export {
   authenticatedFetch,
-  authenticatedFetchNoNotifications,
   cssServer,
-  cssServerNoNotifications,
+  otherAuthenticatedFetch,
+  otherPerson,
   person,
-  personNoNotifications,
   server,
 }

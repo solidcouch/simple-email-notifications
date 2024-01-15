@@ -5,9 +5,9 @@ import Mail from 'nodemailer/lib/mailer'
 import { SinonSandbox, SinonSpy, createSandbox } from 'sinon'
 import { baseUrl } from '../config'
 import * as mailerService from '../services/mailerService'
-import { authenticatedFetch, person } from './testSetup.spec'
+import { authenticatedFetch, otherAuthenticatedFetch } from './testSetup.spec'
 
-describe('Mailer integration via /inbox', () => {
+describe('Initialize email integration via /init', () => {
   let sendMailSpy: SinonSpy<[options: Mail.Options], Promise<void>>
   let sandbox: SinonSandbox
 
@@ -20,52 +20,41 @@ describe('Mailer integration via /inbox', () => {
     sandbox.restore()
   })
 
-  it('should be able to receive integration request to inbox', async () => {
-    const response = await authenticatedFetch(`${baseUrl}/inbox`, {
-      method: 'post',
-      headers: {
-        'content-type':
-          'application/ld+json;profile="https://www.w3.org/ns/activitystreams"',
-      },
-      body: JSON.stringify({
-        '@context': 'https://www.w3.org/ns/activitystreams',
-        '@id': '',
-        '@type': 'Add',
-        actor: person.webId,
-        object: person.podUrl + 'inbox/',
-        target: 'email@example.com',
-      }),
+  context('everything ok', () => {
+    let response: Response
+    beforeEach(async () => {
+      response = await authenticatedFetch(`${baseUrl}/init`, {
+        method: 'post',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email: 'email@example.com' }),
+      })
     })
 
-    expect(sendMailSpy.calledOnce).to.be.true
-    expect(sendMailSpy.firstCall.firstArg).to.haveOwnProperty(
-      'to',
-      'email@example.com',
-    )
-    expect(sendMailSpy.firstCall.firstArg)
-      .to.haveOwnProperty('text')
-      .include(`verify-email?id=${encodeURIComponent(person.webId)}&token=`)
-    expect(sendMailSpy.firstCall.firstArg)
-      .to.haveOwnProperty('html')
-      .include(`verify-email?id=${encodeURIComponent(person.webId)}&token=`)
-    expect(response.status).to.equal(200)
+    it('should be able to receive integration request to /init', async () => {
+      expect(response.status).to.equal(200)
+    })
+
+    it('should send email with verification link', async () => {
+      expect(sendMailSpy.calledOnce).to.be.true
+      expect(sendMailSpy.firstCall.firstArg).to.haveOwnProperty(
+        'to',
+        'email@example.com',
+      )
+      expect(sendMailSpy.firstCall.firstArg)
+        .to.haveOwnProperty('text')
+        .include(`verify-email?token=eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.`)
+      expect(sendMailSpy.firstCall.firstArg)
+        .to.haveOwnProperty('html')
+        .include(`verify-email?token=eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.`)
+      // maybe TODO we can perhaps also check the payload of the token
+    })
   })
 
   it('[invalid request body] should respond with 400', async () => {
-    const response = await authenticatedFetch(`${baseUrl}/inbox`, {
+    const response = await authenticatedFetch(`${baseUrl}/init`, {
       method: 'post',
-      headers: {
-        'content-type':
-          'application/ld+json;profile="https://www.w3.org/ns/activitystreams"',
-      },
-      body: JSON.stringify({
-        '@context': 'https://www.w3.org/ns/activitystrams',
-        '@id': '',
-        '@type': 'ads',
-        actor: 'asdf',
-        object: '/inbox',
-        target: 'yay',
-      }),
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ email: 'yay' }),
     })
 
     expect(response.status).to.equal(400)
@@ -73,47 +62,25 @@ describe('Mailer integration via /inbox', () => {
 
   context('person not signed in', () => {
     it('should respond with 401', async () => {
-      const response = await fetch(`${baseUrl}/inbox`, {
+      const response = await fetch(`${baseUrl}/init`, {
         method: 'post',
-        headers: { 'content-type': 'application/ld+json' },
-        body: JSON.stringify({
-          '@context': 'https://www.w3.org/ns/activitystreams',
-          '@id': '',
-          '@type': 'Add',
-          actor: person.webId,
-          object: person.podUrl + 'inbox/',
-          target: 'email@example.com',
-        }),
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email: 'email@example.com' }),
       })
 
       expect(response.status).to.equal(401)
     })
   })
 
-  context("authenticated person and actor don't match", () => {
+  context('person is not in the allowed group(s)', () => {
     it('should respond with 403', async () => {
-      const response = await authenticatedFetch(`${baseUrl}/inbox`, {
+      const response = await otherAuthenticatedFetch(`${baseUrl}/init`, {
         method: 'post',
-        headers: { 'content-type': 'application/ld+json' },
-        body: JSON.stringify({
-          '@context': 'https://www.w3.org/ns/activitystreams',
-          '@id': '',
-          '@type': 'Add',
-          actor: 'http://localhost:3456/person2/profile/card#me',
-          object: person.podUrl + 'inbox/',
-          target: 'email2@example.com',
-        }),
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ email: 'email@example.com' }),
       })
 
       expect(response.status).to.equal(403)
     })
   })
-
-  it(
-    'should check that the inbox belongs to the person requesting subscription',
-  )
-
-  it('should check that it can read the inbox')
-
-  it('should send email with verification link')
 })

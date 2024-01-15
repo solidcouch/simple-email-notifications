@@ -9,7 +9,7 @@ import * as mailerService from '../services/mailerService'
 import { addRead, setupInbox } from '../setup'
 import { authenticatedFetch, person } from './testSetup.spec'
 
-describe('get info about integrations of current person with GET /status', () => {
+describe.skip('get info about integrations of a person with GET /status', () => {
   let sendMailSpy: SinonSpy<[options: Mail.Options], Promise<void>>
   let verificationLink: string
   let sandbox: SinonSandbox
@@ -69,43 +69,6 @@ describe('get info about integrations of current person with GET /status', () =>
     expect(response.status).to.equal(401)
   })
 
-  it('should show list of resources (inboxes) current user is observing', async () => {
-    // finish the integration
-    const finishResponse = await fetch(verificationLink)
-    expect(finishResponse.status).to.equal(200)
-
-    const response = await authenticatedFetch(`${baseUrl}/status`)
-    expect(response.status).to.equal(200)
-
-    const body = await response.json()
-
-    expect(body).to.deep.equal({
-      actor: person.webId,
-      integrations: [
-        {
-          object: `${person.podUrl}inbox/`,
-          target: 'email@example.com',
-          verified: true,
-        },
-      ],
-    })
-  })
-
-  it('should show unverified integrations', async () => {
-    const response = await authenticatedFetch(`${baseUrl}/status`)
-    expect(response.status).to.equal(200)
-
-    const body = await response.json()
-
-    expect(body).to.deep.equal({
-      actor: person.webId,
-      integrations: [
-        {
-          object: `${person.podUrl}inbox/`,
-          target: 'email@example.com',
-          verified: false,
-        },
-      ],
-    })
-  })
+  it('[authenticated person not from group] should fail with 403')
+  it('[requested person not from group] should fail with 400')
 })

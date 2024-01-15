@@ -27,6 +27,7 @@ export const solidAuth: Middleware = async (ctx, next) => {
     }`
 
     ctx.throw(401, message)
+    return
   }
 
   // on success continue
