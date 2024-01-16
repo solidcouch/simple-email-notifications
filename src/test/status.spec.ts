@@ -3,7 +3,7 @@ import fetch from 'cross-fetch'
 import { describe } from 'mocha'
 import { baseUrl } from '../config'
 import { verifyEmail } from './helpers'
-import { addRead, setupEmailSettings, setupInbox } from './helpers/setupPod'
+import { setupEmailSettings } from './helpers/setupPod'
 import {
   authenticatedFetch,
   authenticatedFetch3,
@@ -19,20 +19,6 @@ describe('get info about integrations of a person with GET /status/:webId', () =
   beforeEach(async () => {
     const token = await verifyEmail({ email, authenticatedFetch })
     await setupEmailSettings({ person, email, emailVerificationToken: token })
-  })
-
-  beforeEach(async () => {
-    await setupInbox({
-      webId: person.webId,
-      inbox: `${person.podUrl}inbox/`,
-      authenticatedFetch,
-    })
-
-    await addRead({
-      resource: `${person.podUrl}inbox/`,
-      agent: 'http://localhost:3456/bot/profile/card#me',
-      authenticatedFetch,
-    })
   })
 
   it('[not authenticated] should fail with 401', async () => {
