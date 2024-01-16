@@ -1,29 +1,62 @@
-import { Middleware } from 'koa'
+import { DefaultContext, DefaultState, Middleware } from 'koa'
 import { Parser } from 'n3'
 import { vcard } from 'rdf-namespaces'
 
 export const authorizeGroups =
-  (groups: string[]): Middleware =>
+  (groups: string[]): Middleware<{ user: string }> =>
   async (ctx, next) => {
     // if array of groups are empty, we allow everybody (default)
     if (groups.length === 0) return await next()
 
-    const user = <string>ctx.state.user
+    const user = ctx.state.user
 
-    const memberships = await Promise.allSettled(
-      groups.map(group => isGroupMember(user, group)),
-    )
-
-    const isAllowed = memberships.some(
-      membership =>
-        membership.status === 'fulfilled' && membership.value === true,
-    )
+    const isAllowed = await isSomeGroupMember(user, groups)
 
     if (!isAllowed) {
       return ctx.throw(
         403,
         'Authenticated user is not a member of any allowed group',
       )
+    }
+
+    await next()
+  }
+
+const isSomeGroupMember = async (user: string, groups: string[]) => {
+  const memberships = await Promise.allSettled(
+    groups.map(group => isGroupMember(user, group)),
+  )
+
+  const isMember = memberships.some(
+    membership =>
+      membership.status === 'fulfilled' && membership.value === true,
+  )
+  return isMember
+}
+
+/**
+ * Check whether a user specified in param is member of any of the given groups
+ */
+export const checkParamGroupMembership =
+  <T extends string>(
+    groups: string[],
+    param: T,
+  ): Middleware<
+    DefaultState,
+    DefaultContext & { params: { [K in T]: string } }
+  > =>
+  async (ctx, next) => {
+    // if array of groups are empty, we allow everybody (default)
+    if (groups.length === 0) return await next()
+    const webId = ctx.params[param]
+    const isAllowed = await isSomeGroupMember(webId, groups)
+
+    if (!isAllowed) {
+      return ctx.throw(400, {
+        error: 'Person is not a member of any allowed group',
+        person: webId,
+        groups,
+      })
     }
 
     await next()

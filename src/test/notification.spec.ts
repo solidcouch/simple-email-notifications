@@ -8,7 +8,7 @@ import { SinonSandbox, SinonSpy, createSandbox } from 'sinon'
 import { promisify } from 'util'
 import { baseUrl } from '../config'
 import * as mailerService from '../services/mailerService'
-import { addRead, setupInbox } from '../setup'
+import { addRead, setupInbox } from './helpers/setupPod'
 import { authenticatedFetch, person } from './testSetup.spec'
 
 describe.skip('received notification via /inbox', () => {

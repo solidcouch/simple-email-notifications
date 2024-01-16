@@ -5,7 +5,10 @@ import type {
 import * as verifier from '@solid/access-token-verifier'
 import type { Middleware } from 'koa'
 
-export const solidAuth: Middleware = async (ctx, next) => {
+export const solidAuth: Middleware<{
+  user: string
+  client: string | undefined
+}> = async (ctx, next) => {
   const authorizationHeader = ctx.request.headers.authorization
   const dpopHeader = ctx.request.headers.dpop
   const solidOidcAccessTokenVerifier: SolidTokenVerifierFunction =

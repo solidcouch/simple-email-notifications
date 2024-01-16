@@ -16,6 +16,8 @@ export const mailerCredentials = {
   webId:
     process.env.MAILER_IDENTITY_WEBID ??
     'http://localhost:3456/bot/profile/card#me',
+  // version of CommunitySolidServer that provides identity for mailer
+  cssVersion: <6 | 7>+(process.env.MAILER_IDENTITY_CSS_VERSION ?? 7), // 6 or 7
 }
 
 const stringToBoolean = (value: string | undefined): boolean => {
@@ -71,3 +73,7 @@ export const jwt = {
   key: process.env.JWT_KEY ?? './ecdsa-p256-private.pem',
   alg: process.env.JWT_ALG ?? 'ES256',
 }
+
+export const emailDiscoveryType =
+  process.env.EMAIL_DISCOVERY_TYPE ??
+  'http://w3id.org/hospex/ns#PersonalHospexDocument'

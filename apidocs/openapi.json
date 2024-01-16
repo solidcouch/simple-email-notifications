@@ -11,7 +11,7 @@
     }
   ],
   "paths": {
-    "/inbox": {
+    "/init": {
       "post": {
         "description": "",
         "responses": {
@@ -26,34 +26,13 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "@context": {
-                    "const": "https://www.w3.org/ns/activitystreams"
-                  },
-                  "@id": {
-                    "type": "string"
-                  },
-                  "@type": {
-                    "const": "Add"
-                  },
-                  "actor": {
-                    "type": "string",
-                    "format": "uri"
-                  },
-                  "object": {
-                    "type": "string",
-                    "format": "uri"
-                  },
-                  "target": {
+                  "email": {
                     "type": "string",
                     "format": "email"
                   }
                 },
                 "required": [
-                  "@context",
-                  "@type",
-                  "actor",
-                  "object",
-                  "target"
+                  "email"
                 ],
                 "additionalProperties": false
               }
@@ -82,9 +61,19 @@
         }
       }
     },
-    "/status": {
+    "/status/{webId}": {
       "get": {
         "description": "",
+        "parameters": [
+          {
+            "name": "webId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "responses": {
           "default": {
             "description": ""
