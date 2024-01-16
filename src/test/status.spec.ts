@@ -18,7 +18,12 @@ const email = 'email@example.com'
 describe('get info about integrations of a person with GET /status/:webId', () => {
   beforeEach(async () => {
     const token = await verifyEmail({ email, authenticatedFetch })
-    await setupEmailSettings({ person, email, emailVerificationToken: token })
+    await setupEmailSettings({
+      person,
+      email,
+      emailVerificationToken: token,
+      authenticatedFetch,
+    })
   })
 
   it('[not authenticated] should fail with 401', async () => {

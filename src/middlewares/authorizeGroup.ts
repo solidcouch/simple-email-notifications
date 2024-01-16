@@ -1,26 +1,17 @@
-import { DefaultContext, DefaultState, Middleware } from 'koa'
+import { Middleware } from 'koa'
+import { get } from 'lodash'
 import { Parser } from 'n3'
 import { vcard } from 'rdf-namespaces'
 
-export const authorizeGroups =
-  (groups: string[]): Middleware<{ user: string }> =>
-  async (ctx, next) => {
-    // if array of groups are empty, we allow everybody (default)
-    if (groups.length === 0) return await next()
-
-    const user = ctx.state.user
-
-    const isAllowed = await isSomeGroupMember(user, groups)
-
-    if (!isAllowed) {
-      return ctx.throw(
-        403,
-        'Authenticated user is not a member of any allowed group',
-      )
-    }
-
-    await next()
-  }
+export const authorizeGroups = (
+  groups: string[],
+): Middleware<{ user: string }> =>
+  checkGroupMembership(
+    groups,
+    'state.user',
+    403,
+    'Authenticated user is not a member of any allowed group',
+  )
 
 const isSomeGroupMember = async (user: string, groups: string[]) => {
   const memberships = await Promise.allSettled(
@@ -37,29 +28,24 @@ const isSomeGroupMember = async (user: string, groups: string[]) => {
 /**
  * Check whether a user specified in param is member of any of the given groups
  */
-export const checkParamGroupMembership =
-  <T extends string>(
+export const checkGroupMembership =
+  (
     groups: string[],
-    param: T,
-  ): Middleware<
-    DefaultState,
-    DefaultContext & { params: { [K in T]: string } }
-  > =>
+    path: string,
+    status: number,
+    error = 'Person is not a member of any allowed group',
+  ): Middleware =>
   async (ctx, next) => {
     // if array of groups are empty, we allow everybody (default)
     if (groups.length === 0) return await next()
-    const webId = ctx.params[param]
+    const webId = get(ctx, path)
+    if (typeof webId !== 'string')
+      throw new Error('Expected string, got ' + typeof webId)
     const isAllowed = await isSomeGroupMember(webId, groups)
 
     if (!isAllowed) {
-      return ctx.throw(400, {
-        error: 'Person is not a member of any allowed group',
-        person: webId,
-        groups,
-      })
-    }
-
-    await next()
+      return ctx.throw(status, error)
+    } else await next()
   }
 
 const isGroupMember = async (user: string, group: string) => {

@@ -10,11 +10,11 @@ import {
   finishIntegration,
   initializeIntegration,
 } from './controllers/integration'
+import { notification } from './controllers/notification'
 import { getStatus } from './controllers/status'
-import { webhookReceiver } from './controllers/webhookReceiver'
 import {
   authorizeGroups,
-  checkParamGroupMembership,
+  checkGroupMembership,
 } from './middlewares/authorizeGroup'
 import { solidAuth } from './middlewares/solidAuth'
 import { validateBody } from './middlewares/validate'
@@ -53,12 +53,55 @@ router
     initializeIntegration,
   )
   .get('/verify-email', checkVerificationLink, finishIntegration)
-  .post('/webhook-receiver', webhookReceiver)
+  .post(
+    '/notification',
+    solidAuth,
+    authorizeGroups(allowedGroups),
+    validateBody({
+      type: 'object',
+      properties: {
+        '@context': { const: 'https://www.w3.org/ns/activitystreams' },
+        id: { type: 'string' },
+        type: { const: 'Create' },
+        actor: {
+          type: 'object',
+          properties: {
+            type: { const: 'Person' },
+            id: { type: 'string', format: 'uri' },
+            name: { type: 'string' },
+          },
+          required: ['type', 'id'],
+        },
+        object: {
+          type: 'object',
+          properties: {
+            type: { const: 'Note' },
+            id: { type: 'string', format: 'uri' },
+            content: { type: 'string' },
+          },
+          required: ['type', 'id', 'content'],
+        },
+        target: {
+          type: 'object',
+          properties: {
+            type: { const: 'Person' },
+            id: { type: 'string', format: 'uri' },
+            name: { type: 'string' },
+          },
+          required: ['type', 'id'],
+        },
+      },
+      required: ['@context', 'type', 'actor', 'object', 'target'],
+      additionalProperties: false,
+    }),
+    checkGroupMembership(allowedGroups, 'request.body.target.id', 400),
+    notification,
+  )
   .get(
     '/status/:webId',
     solidAuth,
     authorizeGroups(allowedGroups),
-    checkParamGroupMembership(allowedGroups, 'webId' as const),
+    checkGroupMembership(allowedGroups, 'params.webId', 400),
     getStatus,
   )
 
