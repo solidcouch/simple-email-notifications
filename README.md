@@ -1,15 +1,25 @@
 # Simple Solid email notifications
 
-This service sends email from one person within a Solid group to another. It doesn't use native Solid notifications, because there are pods that don't support it.
+This service sends email from one person within a Solid group to another. It doesn't use native Solid notifications, because there are pods that don't support them.
 
 ## How it works
 
-- It's a bot agent with its own identity, which must be provided by arbitrary CommunitySolidServer pod
+- It's a bot agent with its own identity, which must be provided by arbitrary [CommunitySolidServer](https://github.com/CommunitySolidServer/CommunitySolidServer) pod
 - It runs on a server
 - You can check whether another person in the group has set up email notifications.
 - If the other person has set up the notifications, you can send them an email through this service.
 - At the beginning, you need to verify your email, save it into your hospitality exchange settings, and give the mailer a permission to read the email; so the email notifier can access the settings when it sends you an email.
 - When you want to notify other person, the service will check whether both of you belong to the specified group(s). If you both belong, and the other person has email notifications set up, it will send the other person an email.
+
+### Verified email address discovery
+
+Email address and verification token should be stored in (webId) - space:preferencesFile -> (email settings file) to which the mailer identity has read (and maybe write) access. It can be in the main webId file, or it can be in some document discovered via publicTypeIndex. In case of hospitality exchange, it can be in hospex:PersonalHospexDocument.
+
+1. Go to person's webId
+1. Find public type index `(webId) - solid:publicTypeIndex -> (publicTypeIndex)``
+1. Find instances of hospex:PersonalHospexDocument
+1. Find settings in the relevant instance (webId) - space:preferencesFile -> (settings)
+1. In the settings, find (webId) - foaf:mbox -> (email) and (webId) - example:emailVerificationToken -> (JWT)
 
 ## Usage
 

@@ -2541,6 +2541,13 @@
     methods "^1.1.2"
     path-to-regexp "^6.2.1"
 
+"@ldhop/core@^0.0.0-alpha.0":
+  version "0.0.0-alpha.0"
+  resolved "https://registry.yarnpkg.com/@ldhop/core/-/core-0.0.0-alpha.0.tgz#4504a33b9a2cbf6199434391d606ecf14b31972b"
+  integrity sha512-XryHFesKAIO6AZPA3Z6jx71FwwtyiEt6ICd3/Xdar/sXPm/aT0qKqWAJthZZhbgW0r49X6NWs8NhT/GGYzEj3g==
+  dependencies:
+    n3 "^1.17.2"
+
 "@mapbox/node-pre-gyp@^1.0.0":
   version "1.0.11"
   resolved "https://registry.yarnpkg.com/@mapbox/node-pre-gyp/-/node-pre-gyp-1.0.11.tgz#417db42b7f5323d79e93b34a6d7a2a12c0df43fa"
@@ -6455,7 +6462,7 @@ n3@^1.16.2, n3@^1.16.3, n3@^1.17.0, n3@^1.6.3:
     queue-microtask "^1.1.2"
     readable-stream "^4.0.0"
 
-n3@^1.17.1:
+n3@^1.17.1, n3@^1.17.2:
   version "1.17.2"
   resolved "https://registry.yarnpkg.com/n3/-/n3-1.17.2.tgz#3370b2d07da98a5b2865fa43c2d4e5c563cc65df"
   integrity sha512-BxSM52wYFqXrbQQT5WUEzKUn6qpYV+2L4XZLfn3Gblz2kwZ09S+QxC33WNdVEQy2djenFL8SNkrjejEKlvI6+Q==

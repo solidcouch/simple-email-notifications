@@ -8,27 +8,16 @@ import { SetupServer, setupServer } from 'msw/node'
 import app from '../app'
 import { port } from '../config'
 import { EmailVerification, Integration } from '../config/sequelize'
-import { createRandomAccount } from '../helpers'
+import { createRandomAccount } from './helpers'
+import type { Person } from './helpers/types'
 
 let server: Server<typeof IncomingMessage, typeof ServerResponse>
 let authenticatedFetch: typeof fetch
 let otherAuthenticatedFetch: typeof fetch
-let person: {
-  idp: string
-  podUrl: string
-  webId: string
-  username: string
-  password: string
-  email: string
-}
-let otherPerson: {
-  idp: string
-  podUrl: string
-  webId: string
-  username: string
-  password: string
-  email: string
-}
+let authenticatedFetch3: typeof fetch
+let person: Person
+let otherPerson: Person
+let person3: Person
 let cssServer: css.App
 let mockServer: SetupServer
 
@@ -110,6 +99,13 @@ beforeEach(async () => {
     password: otherPerson.password,
     provider: 'http://localhost:3456',
   })
+
+  person3 = await createRandomAccount({ solidServer: 'http://localhost:3456' })
+  authenticatedFetch3 = await getAuthenticatedFetch({
+    email: person3.email,
+    password: person3.password,
+    provider: 'http://localhost:3456',
+  })
 })
 
 // Enable request interception.
@@ -121,7 +117,7 @@ beforeEach(async () => {
     http.get('https://example.com/', (/*{ request, params, cookies }*/) => {
       return HttpResponse.text(`
           @prefix vcard: <http://www.w3.org/2006/vcard/ns#> .
-          <#us> vcard:hasMember <${person.webId}> .
+          <#us> vcard:hasMember <${person.webId}>, <${person3.webId}> .
           `)
     }),
   )
@@ -137,9 +133,11 @@ afterEach(() => {
 
 export {
   authenticatedFetch,
+  authenticatedFetch3,
   cssServer,
   otherAuthenticatedFetch,
   otherPerson,
   person,
+  person3,
   server,
 }

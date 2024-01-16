@@ -1,22 +1,18 @@
 import { expect } from 'chai'
-import * as cheerio from 'cheerio'
 import fetch from 'cross-fetch'
 import * as jsonwebtoken from 'jsonwebtoken'
 import { describe } from 'mocha'
-import Mail from 'nodemailer/lib/mailer'
-import { SinonSandbox, SinonSpy, createSandbox } from 'sinon'
+import { SinonSandbox, createSandbox } from 'sinon'
 import * as config from '../config'
-import * as mailerService from '../services/mailerService'
+import { initIntegration } from './helpers'
 import { authenticatedFetch, person } from './testSetup.spec'
 
 describe('email verification via /verify-email?token=jwt', () => {
-  let sendMailSpy: SinonSpy<[options: Mail.Options], Promise<void>>
   let verificationLink: string
   let sandbox: SinonSandbox
 
   beforeEach(() => {
     sandbox = createSandbox()
-    sendMailSpy = sandbox.spy(mailerService, 'sendMail')
     sandbox.useFakeTimers({ now: Date.now(), toFake: ['Date'] })
   })
 
@@ -26,18 +22,10 @@ describe('email verification via /verify-email?token=jwt', () => {
 
   beforeEach(async () => {
     // initialize the integration
-    const initResponse = await authenticatedFetch(`${config.baseUrl}/init`, {
-      method: 'post',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ email: 'email@example.com' }),
-    })
-
-    expect(initResponse.status).to.equal(200)
-    // email was sent
-    const emailMessage = sendMailSpy.firstCall.firstArg.html
-    const $ = cheerio.load(emailMessage)
-    verificationLink = $('a').first().attr('href') as string
-    expect(verificationLink).to.not.be.null
+    ;({ verificationLink } = await initIntegration({
+      email: 'email@example.com',
+      authenticatedFetch,
+    }))
   })
 
   it('[correct token] should respond with 200', async () => {

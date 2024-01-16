@@ -12,7 +12,10 @@ import {
 } from './controllers/integration'
 import { getStatus } from './controllers/status'
 import { webhookReceiver } from './controllers/webhookReceiver'
-import { authorizeGroups } from './middlewares/authorizeGroup'
+import {
+  authorizeGroups,
+  checkParamGroupMembership,
+} from './middlewares/authorizeGroup'
 import { solidAuth } from './middlewares/solidAuth'
 import { validateBody } from './middlewares/validate'
 
@@ -90,7 +93,13 @@ router
   )
   .get('/verify-email', checkVerificationLink, finishIntegration)
   .post('/webhook-receiver', webhookReceiver)
-  .get('/status', solidAuth, getStatus)
+  .get(
+    '/status/:webId',
+    solidAuth,
+    authorizeGroups(allowedGroups),
+    checkParamGroupMembership(allowedGroups, 'webId' as const),
+    getStatus,
+  )
 
 app
   .use(helmet())
