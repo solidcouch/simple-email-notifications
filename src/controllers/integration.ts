@@ -1,8 +1,6 @@
 import { readFile } from 'fs-extra'
-import jsonwebtoken, {
-  JsonWebTokenError,
-  TokenExpiredError,
-} from 'jsonwebtoken'
+import * as jsonwebtoken from 'jsonwebtoken'
+import { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken'
 import { Middleware } from 'koa'
 import { pick } from 'lodash'
 import * as config from '../config'

@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import * as cheerio from 'cheerio'
 import { createAccount } from 'css-authn/dist/7.x'
 import { createSandbox } from 'sinon'
-import * as uuid from 'uuid'
+import { v4 as uuidv4 } from 'uuid'
 import * as config from '../../config'
 import * as mailerService from '../../services/mailerService'
 
@@ -12,9 +12,9 @@ export const createRandomAccount = ({
   solidServer: string
 }) => {
   return createAccount({
-    username: uuid.v4(),
-    password: uuid.v4(),
-    email: uuid.v4() + '@example.com',
+    username: uuidv4(),
+    password: uuidv4(),
+    email: uuidv4() + '@example.com',
     provider: solidServer,
   })
 }
@@ -45,7 +45,7 @@ export const initIntegration = async ({
   return { verificationLink }
 }
 
-export const finishIntegration = async (verificationLink: string) => {
+const finishIntegration = async (verificationLink: string) => {
   const response = await fetch(verificationLink)
   expect(response.ok).to.be.true
   const jwt = await response.text()
