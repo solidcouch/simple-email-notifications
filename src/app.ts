@@ -24,65 +24,26 @@ app.proxy = isBehindProxy
 const router = new Router()
 
 router
-  // .post(
-  //   '/inbox',
-  //   solidAuth,
-  //   /*
-  //   #swagger.requestBody = {
-  //     required: true,
-  //     content: {
-  //       'application/json': {
-  //         schema: {
-  //           type: 'object',
-  //           properties: {
-  //             '@context': { const: 'https://www.w3.org/ns/activitystreams' },
-  //             '@id': { type: 'string' },
-  //             '@type': { const: 'Add' },
-  //             actor: { type: 'string', format: 'uri' },
-  //             object: { type: 'string', format: 'uri' },
-  //             target: { type: 'string', format: 'email' },
-  //           },
-  //           required: ['@context', '@type', 'actor', 'object', 'target'],
-  //           additionalProperties: false,
-  //         },
-  //       },
-  //     },
-  //   }
-  //   */
-  //   validateBody({
-  //     type: 'object',
-  //     properties: {
-  //       '@context': { const: 'https://www.w3.org/ns/activitystreams' },
-  //       '@id': { type: 'string' },
-  //       '@type': { const: 'Add' },
-  //       actor: { type: 'string', format: 'uri' },
-  //       object: { type: 'string', format: 'uri' },
-  //       target: { type: 'string', format: 'email' },
-  //     },
-  //     required: ['@context', '@type', 'actor', 'object', 'target'],
-  //     additionalProperties: false,
-  //   }),
-  //   initializeIntegration,
-  // )
   .post(
     '/init',
     solidAuth,
     authorizeGroups(allowedGroups),
-    // #swagger.requestBody = {
-    //   required: true,
-    //   content: {
-    //     'application/json': {
-    //       schema: {
-    //         type: 'object',
-    //         properties: {
-    //           email: { type: 'string', format: 'email' },
-    //         },
-    //         required: ['email'],
-    //         additionalProperties: false,
-    //       },
-    //     },
-    //   },
-    // }
+    /* #swagger.requestBody = {
+      required: true,
+      content: {
+        'application/json': {
+          schema: {
+            type: 'object',
+            properties: {
+              email: { type: 'string', format: 'email' },
+            },
+            required: ['email'],
+            additionalProperties: false,
+          },
+        },
+      },
+    }
+    */
     validateBody({
       type: 'object',
       properties: { email: { type: 'string', format: 'email' } },

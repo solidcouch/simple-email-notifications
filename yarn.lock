@@ -2541,12 +2541,13 @@
     methods "^1.1.2"
     path-to-regexp "^6.2.1"
 
-"@ldhop/core@^0.0.0-alpha.0":
-  version "0.0.0-alpha.0"
-  resolved "https://registry.yarnpkg.com/@ldhop/core/-/core-0.0.0-alpha.0.tgz#4504a33b9a2cbf6199434391d606ecf14b31972b"
-  integrity sha512-XryHFesKAIO6AZPA3Z6jx71FwwtyiEt6ICd3/Xdar/sXPm/aT0qKqWAJthZZhbgW0r49X6NWs8NhT/GGYzEj3g==
+"@ldhop/core@^0.0.0-alpha.1":
+  version "0.0.0-alpha.1"
+  resolved "https://registry.yarnpkg.com/@ldhop/core/-/core-0.0.0-alpha.1.tgz#c18ed9427cfd69dab55ab314d18305759d2d2dcb"
+  integrity sha512-64g79eUg2ev1KlZju0WgNeF5xZITO3WNdcaVb3sU/2jAI8mki89cQyY24AuoTWWcEl46FBZFEmmTDRORkWRd1Q==
   dependencies:
     n3 "^1.17.2"
+    utility-types "^3.10.0"
 
 "@mapbox/node-pre-gyp@^1.0.0":
   version "1.0.11"
@@ -8173,6 +8174,11 @@ util-deprecate@^1.0.1:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/util-deprecate/-/util-deprecate-1.0.2.tgz#450d4dc9fa70de732762fbd2d4a28981419a0ccf"
   integrity sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==
+
+utility-types@^3.10.0:
+  version "3.10.0"
+  resolved "https://registry.yarnpkg.com/utility-types/-/utility-types-3.10.0.tgz#ea4148f9a741015f05ed74fd615e1d20e6bed82b"
+  integrity sha512-O11mqxmi7wMKCo6HKFt5AhO4BwY3VV68YU07tgxfz8zJTIxr4BpsezN49Ffwy9j3ZpwwJp4fkRwjRzq3uWE6Rg==
 
 utils-merge@1.0.1:
   version "1.0.1"
