@@ -65,3 +65,6 @@ export const jwt = {
 export const emailDiscoveryType =
   process.env.EMAIL_DISCOVERY_TYPE ??
   'http://w3id.org/hospex/ns#PersonalHospexDocument'
+
+export const verificationTokenPredicate =
+  'https://example.com/emailVerificationToken'

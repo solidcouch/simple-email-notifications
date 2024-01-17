@@ -3,7 +3,6 @@ import fetch from 'cross-fetch'
 import { describe } from 'mocha'
 import { baseUrl } from '../config'
 import { verifyEmail } from './helpers'
-import { setupEmailSettings } from './helpers/setupPod'
 import {
   authenticatedFetch,
   authenticatedFetch3,
@@ -17,13 +16,7 @@ const email = 'email@example.com'
 
 describe('get info about integrations of a person with GET /status/:webId', () => {
   beforeEach(async () => {
-    const token = await verifyEmail({ email, authenticatedFetch })
-    await setupEmailSettings({
-      person,
-      email,
-      emailVerificationToken: token,
-      authenticatedFetch,
-    })
+    await verifyEmail({ email, authenticatedFetch, person })
   })
 
   it('[not authenticated] should fail with 401', async () => {

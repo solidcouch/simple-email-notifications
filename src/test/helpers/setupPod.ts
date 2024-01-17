@@ -106,7 +106,7 @@ export const setupEmailSettings = async ({
     : `
   <${person.webId}>
     <${foaf.mbox}> "${email}";
-    <https://example.com/emailVerificationToken> "${emailVerificationToken}".`
+    <${config.verificationTokenPredicate}> "${emailVerificationToken}".`
   const settingsPath = person.podUrl + 'hospex/email'
 
   await createFile({
@@ -158,6 +158,12 @@ export const setupEmailSettings = async ({
     inserts: profileDocumentPatch,
     authenticatedFetch,
   })
+
+  return {
+    settings: settingsPath,
+    hospexDocument: hospexDocumentPath,
+    publicTypeIndex: publicTypeIndexPath,
+  }
 }
 
 const addAcl = async ({

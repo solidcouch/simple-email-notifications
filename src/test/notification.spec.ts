@@ -7,7 +7,6 @@ import { baseUrl } from '../config'
 import type { GoodBody } from '../controllers/notification'
 import * as mailerService from '../services/mailerService'
 import { verifyEmail } from './helpers'
-import { setupEmailSettings } from './helpers/setupPod'
 import {
   authenticatedFetch,
   authenticatedFetch3,
@@ -19,6 +18,9 @@ import {
 
 const email = 'email@example.com'
 
+/**
+ * Generate body for POST /notification
+ */
 const getBody = ({
   from,
   to,
@@ -41,14 +43,9 @@ describe('send notification via /notification', () => {
 
   beforeEach(async () => {
     // setup email for receiver
-    const token = await verifyEmail({
+    await verifyEmail({
       email,
-      authenticatedFetch: authenticatedFetch3,
-    })
-    await setupEmailSettings({
       person: person3,
-      email,
-      emailVerificationToken: token,
       authenticatedFetch: authenticatedFetch3,
     })
   })

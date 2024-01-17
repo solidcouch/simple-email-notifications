@@ -5,6 +5,7 @@ import { Middleware } from 'koa'
 import { pick } from 'lodash'
 import * as config from '../config'
 import { sendMail } from '../services/mailerService'
+import { findWritableSettings, getBotFetch } from '../utils'
 
 export const initializeIntegration: Middleware = async ctx => {
   // we should receive info about webId and email address
@@ -84,7 +85,45 @@ export const finishIntegration: Middleware = async ctx => {
     pem,
     { algorithm: 'ES256' },
   )
+
+  // save the token to person
+  const savedTokensCount = await saveTokenToPerson(jwt, webId)
+
+  if (savedTokensCount === 0)
+    return ctx.throw(
+      400,
+      "We could't find any writeable location on your Pod to save the email verifiation token.",
+    )
+
   ctx.response.body = jwt
   ctx.set('content-type', 'text/plain')
   ctx.response.status = 200
+}
+
+/**
+ * Find writable settings files on person's pod
+ * and save the email verification token there
+ */
+const saveTokenToPerson = async (token: string, webId: string) => {
+  // find candidates for saving the token
+  const settings = await findWritableSettings(webId)
+  const authBotFetch = await getBotFetch()
+  // save the token to the candidates and keep track of how many succeeded
+  let okCount = 0
+  for (const uri of settings) {
+    const patch = `@prefix solid: <http://www.w3.org/ns/solid/terms#>.
+    _:patch a solid:InsertDeletePatch;
+      solid:inserts {
+        <${webId}> <${config.verificationTokenPredicate}> "${token}" .
+      } .`
+    const response = await authBotFetch(uri, {
+      method: 'PATCH',
+      headers: { 'content-type': 'text/n3' },
+      body: patch,
+    })
+
+    if (response.ok) okCount++
+  }
+
+  return okCount
 }

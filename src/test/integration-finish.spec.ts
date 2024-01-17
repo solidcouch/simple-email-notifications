@@ -4,12 +4,15 @@ import * as jsonwebtoken from 'jsonwebtoken'
 import { describe } from 'mocha'
 import { SinonSandbox, createSandbox } from 'sinon'
 import * as config from '../config'
+import { fetchRdf } from '../utils'
 import { initIntegration } from './helpers'
+import { setupEmailSettings } from './helpers/setupPod'
 import { authenticatedFetch, person } from './testSetup.spec'
 
 describe('email verification via /verify-email?token=jwt', () => {
   let verificationLink: string
   let sandbox: SinonSandbox
+  let settings: string
 
   beforeEach(() => {
     sandbox = createSandbox()
@@ -25,6 +28,16 @@ describe('email verification via /verify-email?token=jwt', () => {
     ;({ verificationLink } = await initIntegration({
       email: 'email@example.com',
       authenticatedFetch,
+    }))
+  })
+
+  beforeEach(async () => {
+    ;({ settings } = await setupEmailSettings({
+      person,
+      email: '',
+      emailVerificationToken: '',
+      authenticatedFetch,
+      skipSettings: true,
     }))
   })
 
@@ -48,7 +61,24 @@ describe('email verification via /verify-email?token=jwt', () => {
     })
   })
 
-  it("[correct token] (maybe) should save the verification proof to user's pod")
+  it("[correct token] should save the verification proof to user's pod", async () => {
+    // before, the settings should be empty
+    const quadsBefore = await fetchRdf(settings)
+    expect(quadsBefore).to.have.length(0)
+
+    const response = await fetch(verificationLink)
+    expect(response.ok).to.be.true
+    const jwt = await response.text()
+
+    // after, the settings should contain triple <webId> <verification token predicate (config)> "token".
+    const quadsAfter = await fetchRdf(settings)
+    expect(quadsAfter).to.have.length(1)
+    expect(quadsAfter[0].subject.value).to.equal(person.webId)
+    expect(quadsAfter[0].predicate.value).to.equal(
+      config.verificationTokenPredicate,
+    )
+    expect(quadsAfter[0].object.value).to.equal(jwt)
+  })
 
   it('[incorrect token] should respond with 400', async () => {
     const response = await fetch(
