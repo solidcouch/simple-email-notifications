@@ -1,5 +1,5 @@
 import { expect } from 'chai'
-import { foaf, ldp, solid, space } from 'rdf-namespaces'
+import { foaf, solid, space } from 'rdf-namespaces'
 import * as config from '../../config'
 import { Person } from './types'
 
@@ -124,68 +124,12 @@ export const setupEmailSettings = async ({
   })
 }
 
-export const setupInbox = async ({
-  webId,
-  inbox,
-  authenticatedFetch,
-}: {
-  webId: string
-  inbox: string
-  authenticatedFetch: typeof fetch
-}) => {
-  // create inbox
-  const createInboxResponse = await authenticatedFetch(inbox, {
-    method: 'PUT',
-    headers: {
-      link: '<http://www.w3.org/ns/ldp#BasicContainer>; rel="type"',
-      'content-type': 'text/turtle',
-    },
-  })
-
-  expect(createInboxResponse.ok).to.be.true
-
-  const createInboxAclResponse = await authenticatedFetch(inbox + '.acl', {
-    // this .acl is a shortcut, should find .acl properly TODO
-    method: 'PUT',
-    headers: { 'content-type': 'text/turtle' },
-    body: `
-      @prefix acl: <http://www.w3.org/ns/auth/acl#>.
-
-      <#Append>
-        a acl:Authorization;
-        acl:agentClass acl:AuthenticatedAgent;
-        acl:accessTo <./>;
-        acl:default <./>;
-        acl:mode acl:Append.
-      <#ControlReadWrite>
-        a acl:Authorization;
-        acl:agent <${webId}>;
-        acl:accessTo <./>;
-        acl:default <./>;
-        acl:mode acl:Control, acl:Read, acl:Write.
-      `,
-  })
-
-  expect(createInboxAclResponse.ok).to.be.true
-
-  const linkInboxResponse = await authenticatedFetch(webId, {
-    method: 'PATCH',
-    headers: { 'content-type': 'text/n3' },
-    body: `
-      _:mutate a <${solid.InsertDeletePatch}>; <${solid.inserts}> {
-        <${webId}> <${ldp.inbox}> <${inbox}>.
-      }.`,
-  })
-
-  expect(linkInboxResponse.ok).to.be.true
-}
-
 /**
  * Give agent a read access (e.g. to inbox)
  *
  * Currently assumes we're changing rights to container!
  */
-export const addRead = async ({
+const addRead = async ({
   resource,
   agent,
   authenticatedFetch,
@@ -215,7 +159,7 @@ export const addRead = async ({
   return response
 }
 
-export const addPublicRead = async ({
+const addPublicRead = async ({
   resource,
   authenticatedFetch,
 }: {

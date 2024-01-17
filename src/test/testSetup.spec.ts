@@ -7,7 +7,6 @@ import { HttpResponse, http } from 'msw'
 import { SetupServer, setupServer } from 'msw/node'
 import app from '../app'
 import { port } from '../config'
-import { EmailVerification, Integration } from '../config/sequelize'
 import { createRandomAccount } from './helpers'
 import type { Person } from './helpers/types'
 
@@ -74,12 +73,6 @@ after(done => {
   maildev.close(done)
 })
 
-// clear the database before each test
-beforeEach(async () => {
-  await EmailVerification.destroy({ truncate: true })
-  await Integration.destroy({ truncate: true })
-})
-
 /**
  * Before each test, create a new account and authenticate to it
  */
@@ -133,10 +126,8 @@ afterEach(() => {
 export {
   authenticatedFetch,
   authenticatedFetch3,
-  cssServer,
   otherAuthenticatedFetch,
   otherPerson,
   person,
   person3,
-  server,
 }

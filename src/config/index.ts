@@ -1,6 +1,5 @@
 import 'dotenv/config'
 import SMTPTransport from 'nodemailer/lib/smtp-transport'
-import { Dialect, Options } from 'sequelize'
 
 // the defaults work for tests. you should define your own
 // either via .env file, or via environment variables directly (depends on your setup)
@@ -46,17 +45,6 @@ export const port: number = +(process.env.PORT ?? 3005)
 
 // email verification expiration in seconds (1 hour)
 export const emailVerificationExpiration = 3600
-
-// configuration of database in form of sequelize options
-export const database: Options = {
-  dialect: (process.env.DB_DIALECT as Dialect) ?? 'sqlite',
-  storage: process.env.DB_STORAGE || undefined, // Path to the SQLite database file (default is memory)
-  database: process.env.DB_DATABASE || undefined,
-  username: process.env.DB_USERNAME || undefined,
-  password: process.env.DB_PASSWORD || undefined,
-  host: process.env.DB_HOST || undefined,
-  port: process.env.DB_PORT ? +process.env.DB_PORT : undefined,
-}
 
 export const isBehindProxy = stringToBoolean(process.env.BEHIND_PROXY)
 
