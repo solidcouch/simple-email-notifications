@@ -102,8 +102,7 @@ beforeEach(async () => {
 
   person3 = await createRandomAccount({ solidServer: 'http://localhost:3456' })
   authenticatedFetch3 = await getAuthenticatedFetch({
-    email: person3.email,
-    password: person3.password,
+    ...person3,
     provider: 'http://localhost:3456',
   })
 })

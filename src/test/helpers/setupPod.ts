@@ -1,7 +1,6 @@
 import { expect } from 'chai'
 import { foaf, ldp, solid, space } from 'rdf-namespaces'
 import * as config from '../../config'
-import { authenticatedFetch } from '../testSetup.spec'
 import { Person } from './types'
 
 const createFile = async ({
@@ -17,9 +16,10 @@ const createFile = async ({
 }) => {
   const response = await authenticatedFetch(url, {
     method: 'PUT',
-    body: body,
+    body,
     headers: { 'content-type': 'text/turtle' },
   })
+
   expect(response.ok).to.be.true
 
   if (acl && acl.read) {
@@ -63,10 +63,12 @@ export const setupEmailSettings = async ({
   person,
   email,
   emailVerificationToken,
+  authenticatedFetch,
 }: {
   person: Person
   email: string
   emailVerificationToken: string
+  authenticatedFetch: typeof fetch
 }) => {
   // add email settings, readable by mailer
   const settings = `

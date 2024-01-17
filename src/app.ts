@@ -10,14 +10,15 @@ import {
   finishIntegration,
   initializeIntegration,
 } from './controllers/integration'
+import { notification } from './controllers/notification'
 import { getStatus } from './controllers/status'
-import { webhookReceiver } from './controllers/webhookReceiver'
 import {
   authorizeGroups,
-  checkParamGroupMembership,
+  checkGroupMembership,
 } from './middlewares/authorizeGroup'
 import { solidAuth } from './middlewares/solidAuth'
 import { validateBody } from './middlewares/validate'
+import * as schema from './schema'
 
 const app = new Koa()
 app.proxy = isBehindProxy
@@ -33,32 +34,40 @@ router
       content: {
         'application/json': {
           schema: {
-            type: 'object',
-            properties: {
-              email: { type: 'string', format: 'email' },
-            },
-            required: ['email'],
-            additionalProperties: false,
+            $ref: '#/components/schemas/init',
           },
         },
       },
     }
     */
-    validateBody({
-      type: 'object',
-      properties: { email: { type: 'string', format: 'email' } },
-      required: ['email'],
-      additionalProperties: false,
-    }),
+    validateBody(schema.init),
     initializeIntegration,
   )
   .get('/verify-email', checkVerificationLink, finishIntegration)
-  .post('/webhook-receiver', webhookReceiver)
+  .post(
+    '/notification',
+    solidAuth,
+    authorizeGroups(allowedGroups),
+    /* #swagger.requestBody = {
+      required: true,
+      content: {
+        'application/ld+json': {
+          schema: {
+            $ref: '#/components/schemas/notification',
+          },
+        },
+      },
+    }
+    */
+    validateBody(schema.notification),
+    checkGroupMembership(allowedGroups, 'request.body.target.id', 400),
+    notification,
+  )
   .get(
     '/status/:webId',
     solidAuth,
     authorizeGroups(allowedGroups),
-    checkParamGroupMembership(allowedGroups, 'webId' as const),
+    checkGroupMembership(allowedGroups, 'params.webId', 400),
     getStatus,
   )
 
