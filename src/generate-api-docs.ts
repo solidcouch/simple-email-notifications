@@ -1,5 +1,6 @@
 // https://swagger-autogen.github.io/docs/getting-started/advanced-usage#openapi-3x
 import swaggerAutogen from 'swagger-autogen'
+import { init, notification } from './schema'
 
 const doc = {
   info: {
@@ -10,7 +11,7 @@ const doc = {
   },
   servers: [{ url: '/' }],
   tags: [],
-  components: {},
+  components: { '@schemas': { init, notification } },
 }
 
 const outputFile = '../apidocs/openapi.json'

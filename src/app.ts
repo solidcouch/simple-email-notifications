@@ -18,6 +18,7 @@ import {
 } from './middlewares/authorizeGroup'
 import { solidAuth } from './middlewares/solidAuth'
 import { validateBody } from './middlewares/validate'
+import * as schema from './schema'
 
 const app = new Koa()
 app.proxy = isBehindProxy
@@ -33,23 +34,13 @@ router
       content: {
         'application/json': {
           schema: {
-            type: 'object',
-            properties: {
-              email: { type: 'string', format: 'email' },
-            },
-            required: ['email'],
-            additionalProperties: false,
+            $ref: '#/components/schemas/init',
           },
         },
       },
     }
     */
-    validateBody({
-      type: 'object',
-      properties: { email: { type: 'string', format: 'email' } },
-      required: ['email'],
-      additionalProperties: false,
-    }),
+    validateBody(schema.init),
     initializeIntegration,
   )
   .get('/verify-email', checkVerificationLink, finishIntegration)
@@ -57,43 +48,18 @@ router
     '/notification',
     solidAuth,
     authorizeGroups(allowedGroups),
-    validateBody({
-      type: 'object',
-      properties: {
-        '@context': { const: 'https://www.w3.org/ns/activitystreams' },
-        id: { type: 'string' },
-        type: { const: 'Create' },
-        actor: {
-          type: 'object',
-          properties: {
-            type: { const: 'Person' },
-            id: { type: 'string', format: 'uri' },
-            name: { type: 'string' },
+    /* #swagger.requestBody = {
+      required: true,
+      content: {
+        'application/ld+json': {
+          schema: {
+            $ref: '#/components/schemas/notification',
           },
-          required: ['type', 'id'],
-        },
-        object: {
-          type: 'object',
-          properties: {
-            type: { const: 'Note' },
-            id: { type: 'string', format: 'uri' },
-            content: { type: 'string' },
-          },
-          required: ['type', 'id', 'content'],
-        },
-        target: {
-          type: 'object',
-          properties: {
-            type: { const: 'Person' },
-            id: { type: 'string', format: 'uri' },
-            name: { type: 'string' },
-          },
-          required: ['type', 'id'],
         },
       },
-      required: ['@context', 'type', 'actor', 'object', 'target'],
-      additionalProperties: false,
-    }),
+    }
+    */
+    validateBody(schema.notification),
     checkGroupMembership(allowedGroups, 'request.body.target.id', 400),
     notification,
   )
