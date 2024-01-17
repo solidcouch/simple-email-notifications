@@ -11,7 +11,7 @@ const createFile = async ({
 }: {
   url: string
   body: string
-  acl?: { read?: 'public' | string }
+  acl?: { read?: 'public' | string; write?: string; own: string }
   authenticatedFetch: typeof fetch
 }) => {
   const response = await authenticatedFetch(url, {
@@ -22,10 +22,38 @@ const createFile = async ({
 
   expect(response.ok).to.be.true
 
-  if (acl && acl.read) {
-    if (acl.read === 'public')
-      await addPublicRead({ resource: url, authenticatedFetch })
-    else await addRead({ resource: url, agent: acl.read, authenticatedFetch })
+  if (acl) {
+    await addAcl({
+      permissions: ['Read', 'Write', 'Control'],
+      agents: [acl.own],
+      resource: url,
+      authenticatedFetch,
+    })
+
+    if (acl?.read) {
+      if (acl.read === 'public')
+        await addAcl({
+          permissions: ['Read'],
+          agents: [],
+          isPublic: true,
+          resource: url,
+          authenticatedFetch,
+        })
+      else
+        await addAcl({
+          permissions: ['Read'],
+          agents: [acl.read],
+          resource: url,
+          authenticatedFetch,
+        })
+    }
+    if (acl?.write)
+      await addAcl({
+        permissions: ['Write'],
+        agents: [acl.write],
+        resource: url,
+        authenticatedFetch,
+      })
   }
 }
 
@@ -64,14 +92,18 @@ export const setupEmailSettings = async ({
   email,
   emailVerificationToken,
   authenticatedFetch,
+  skipSettings = false,
 }: {
   person: Person
   email: string
   emailVerificationToken: string
   authenticatedFetch: typeof fetch
+  skipSettings?: boolean // this option is useful for testing email integration
 }) => {
   // add email settings, readable by mailer
-  const settings = `
+  const settings = skipSettings
+    ? ''
+    : `
   <${person.webId}>
     <${foaf.mbox}> "${email}";
     <https://example.com/emailVerificationToken> "${emailVerificationToken}".`
@@ -80,7 +112,11 @@ export const setupEmailSettings = async ({
   await createFile({
     url: settingsPath,
     body: settings,
-    acl: { read: config.mailerCredentials.webId },
+    acl: {
+      read: config.mailerCredentials.webId,
+      write: config.mailerCredentials.webId,
+      own: person.webId,
+    },
     authenticatedFetch,
   })
 
@@ -92,7 +128,7 @@ export const setupEmailSettings = async ({
   await createFile({
     url: hospexDocumentPath,
     body: hospexDocument,
-    acl: { read: config.mailerCredentials.webId },
+    acl: { read: config.mailerCredentials.webId, own: person.webId },
     authenticatedFetch,
   })
 
@@ -110,7 +146,7 @@ export const setupEmailSettings = async ({
   await createFile({
     url: publicTypeIndexPath,
     body: publicTypeIndex,
-    acl: { read: 'public' },
+    acl: { read: 'public', own: person.webId },
     authenticatedFetch,
   })
 
@@ -124,20 +160,23 @@ export const setupEmailSettings = async ({
   })
 }
 
-/**
- * Give agent a read access (e.g. to inbox)
- *
- * Currently assumes we're changing rights to container!
- */
-const addRead = async ({
+const addAcl = async ({
+  permissions,
+  agents,
+  isPublic = false,
   resource,
-  agent,
+  isDefault = false,
   authenticatedFetch,
 }: {
+  permissions: ('Read' | 'Write' | 'Append' | 'Control')[]
+  agents: string[]
+  isPublic?: boolean
   resource: string
-  agent: string
+  isDefault?: boolean
   authenticatedFetch: typeof fetch
 }) => {
+  if (permissions.length === 0)
+    throw new Error('You need to specify at least one permission')
   const response = await authenticatedFetch(resource + '.acl', {
     method: 'PATCH',
     headers: { 'content-type': 'text/n3' },
@@ -145,39 +184,13 @@ const addRead = async ({
         @prefix acl: <http://www.w3.org/ns/auth/acl#>.
 
       _:mutate a <${solid.InsertDeletePatch}>; <${solid.inserts}> {
-        <#Read>
+        <#${permissions.join('')}>
           a acl:Authorization;
-          acl:agent <${agent}>;
+          ${agents.length > 0 ? `acl:agent <${agents.join(', ')}>;` : ''}
+          ${isPublic ? `acl:agentClass <${foaf.Agent}>;` : ''}
           acl:accessTo <${resource}>;
-          acl:default <${resource}>;
-          acl:mode acl:Read.
-      }.`,
-  })
-
-  expect(response.ok).to.be.true
-
-  return response
-}
-
-const addPublicRead = async ({
-  resource,
-  authenticatedFetch,
-}: {
-  resource: string
-  authenticatedFetch: typeof fetch
-}) => {
-  const response = await authenticatedFetch(resource + '.acl', {
-    method: 'PATCH',
-    headers: { 'content-type': 'text/n3' },
-    body: `
-        @prefix acl: <http://www.w3.org/ns/auth/acl#>.
-
-      _:mutate a <${solid.InsertDeletePatch}>; <${solid.inserts}> {
-        <#Read>
-          a acl:Authorization;
-          acl:agentClass <http://xmlns.com/foaf/0.1/Agent>;
-          acl:accessTo <${resource}>;
-          acl:mode acl:Read.
+          ${isDefault ? `acl:default <${resource}>;` : ''}
+          acl:mode ${permissions.map(p => `acl:${p}`).join(', ')}.
       }.`,
   })
 
