@@ -89,15 +89,19 @@ export const finishIntegration: Middleware = async ctx => {
   // save the token to person
   const savedTokensCount = await saveTokenToPerson(jwt, webId)
 
-  if (savedTokensCount === 0)
-    return ctx.throw(
-      400,
-      "We could't find any writeable location on your Pod to save the email verifiation token.",
-    )
-
-  ctx.response.body = jwt
-  ctx.set('content-type', 'text/plain')
-  ctx.response.status = 200
+  if (savedTokensCount === 0) {
+    ctx.response.status = 400
+    ctx.set('content-type', 'application/json')
+    ctx.response.body({
+      error:
+        "We could't find any writeable location on your Pod to save the email verifiation token. You can write it manually.",
+      token: jwt,
+    })
+  } else {
+    ctx.response.body = jwt
+    ctx.set('content-type', 'text/plain')
+    ctx.response.status = 200
+  }
 }
 
 /**
