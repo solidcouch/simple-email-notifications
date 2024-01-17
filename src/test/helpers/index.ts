@@ -5,6 +5,8 @@ import { createSandbox } from 'sinon'
 import { v4 as uuidv4 } from 'uuid'
 import * as config from '../../config'
 import * as mailerService from '../../services/mailerService'
+import { setupEmailSettings } from './setupPod'
+import { Person } from './types'
 
 export const createRandomAccount = ({
   solidServer,
@@ -54,15 +56,26 @@ const finishIntegration = async (verificationLink: string) => {
 
 export const verifyEmail = async ({
   email,
+  person,
   authenticatedFetch,
 }: {
   email: string
+  person: Person
   authenticatedFetch: typeof fetch
 }) => {
+  await setupEmailSettings({
+    person,
+    email: '',
+    emailVerificationToken: '',
+    authenticatedFetch,
+    skipSettings: true,
+  })
+
   const { verificationLink } = await initIntegration({
     email,
     authenticatedFetch,
   })
+
   const { token } = await finishIntegration(verificationLink)
 
   return token
