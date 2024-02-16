@@ -27,7 +27,9 @@ Email address and verification token should be stored in (webId) - space:prefere
 
 To authenticate itself, the mailer needs to have its own identity, it can be identity hosted on some Community Solid Server
 
-Copy `.env.sample` to `.env` and edit the latter according to your needs
+Copy `.env.sample` to `.env` and edit the latter according to your needs.
+
+_:warning: If you provide URIs with `#``, put them to `""`, otherwise # may be interpreted as comment!_
 
 Alternatively, you may provide the configuration as environment variables
 

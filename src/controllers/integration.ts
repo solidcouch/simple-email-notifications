@@ -92,11 +92,11 @@ export const finishIntegration: Middleware = async ctx => {
   if (savedTokensCount === 0) {
     ctx.response.status = 400
     ctx.set('content-type', 'application/json')
-    ctx.response.body({
+    ctx.response.body = {
       error:
-        "We could't find any writeable location on your Pod to save the email verifiation token. You can write it manually.",
+        "We couldn't find any writeable location on your Pod to save the email verifiation token. You can write it manually.",
       token: jwt,
-    })
+    }
   } else {
     ctx.response.body = jwt
     ctx.set('content-type', 'text/plain')
