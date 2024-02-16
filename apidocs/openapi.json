@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "version": "1.0.0",
-    "title": "Solid Email Notifications",
-    "description": "Hello world! This is a Solid email notifier. Read more at https://github.com/OpenHospitalityNetwork/solid-email-notifications"
+    "title": "Simple Email Notifications",
+    "description": "Hello world! This is a simple email notifier for Solid apps. Read more at https://github.com/OpenHospitalityNetwork/simple-email-notifications"
   },
   "servers": [
     {

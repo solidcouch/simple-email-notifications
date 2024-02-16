@@ -5,9 +5,9 @@ import { init, notification } from './schema'
 const doc = {
   info: {
     version: '',
-    title: 'Solid Email Notifications',
+    title: 'Simple Email Notifications',
     description:
-      'Hello world! This is a Solid email notifier. Read more at https://github.com/OpenHospitalityNetwork/solid-email-notifications',
+      'Hello world! This is a simple email notifier for Solid apps. Read more at https://github.com/OpenHospitalityNetwork/simple-email-notifications',
   },
   servers: [{ url: '/' }],
   tags: [],
