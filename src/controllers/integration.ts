@@ -33,7 +33,7 @@ export const initializeIntegration: Middleware = async ctx => {
   await sendMail({
     from: config.emailSender,
     to: email,
-    subject: 'Verify your email for sleepy.bike notifications',
+    subject: `Verify your email for ${config.appName} notifications`,
     html: `Please verify your email <a href="${emailVerificationLink}">click here</a>`,
     text: `Please verify your email ${emailVerificationLink}`,
   })

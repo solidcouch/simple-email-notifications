@@ -76,7 +76,7 @@ describe('send notification via /notification', () => {
     const emailNotification = sendMailSpy.firstCall.firstArg
 
     expect(emailNotification).to.exist
-    expect(emailNotification.to).to.equal(email)
+    expect(emailNotification.to).to.haveOwnProperty('address', email)
 
     // TODO
   })
