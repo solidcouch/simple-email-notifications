@@ -1,5 +1,6 @@
 import 'dotenv/config'
 import SMTPTransport from 'nodemailer/lib/smtp-transport'
+import { getBase64Image } from '../utils'
 
 // the defaults work for tests. you should define your own
 // either via .env file, or via environment variables directly (depends on your setup)
@@ -7,7 +8,14 @@ import SMTPTransport from 'nodemailer/lib/smtp-transport'
 // server base url, e.g. to construct correct email verification links
 export const baseUrl = process.env.BASE_URL ?? 'http://localhost:3005'
 
-export const appName = process.env.APP_NAME ?? 'sleepy.bike'
+export const appName = process.env.APP_NAME ?? 'Sleepy.Bike'
+
+// default is 1 transparent PNG pixel
+export const appLogo = getBase64Image(
+  process.env.APP_LOGO ??
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
+)
+export const supportEmail = process.env.SUPPORT_EMAIL ?? 'support@sleepy.bike'
 
 // identity under which the mailer is operating
 export const mailerCredentials = {
@@ -28,7 +36,7 @@ const stringToBoolean = (value: string | undefined): boolean => {
 }
 // SMTP transport for nodemailer (setup for sending emails)
 export const smtpTransportOptions: SMTPTransport.Options = {
-  host: process.env.SMTP_TRANSPORT_HOST || undefined,
+  host: process.env.SMTP_TRANSPORT_HOST || '0.0.0.0',
   port: process.env.SMTP_TRANSPORT_PORT
     ? +process.env.SMTP_TRANSPORT_PORT
     : 1025, // default works for maildev

@@ -1,0 +1,21 @@
+.action-button {
+  padding: 0.25rem 0.5rem;
+  text-align: center;
+  display: inline-block;
+  border: 2px solid black;
+  color: black;
+  text-decoration: none;
+}
+
+.action-button:hover {
+  background-color: #e6e6e6;
+}
+
+body {
+  font-family: Arial, sans-serif;
+}
+
+footer {
+  margin-top: 2rem;
+  font-size: 0.9rem;
+}

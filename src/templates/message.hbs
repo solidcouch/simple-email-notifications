@@ -1,10 +1,16 @@
+<p>Hello{{#if target.name}}&nbsp;{{/if}}{{target.name}}!</p>
 <p>
-  Hello
-  {{target.name}}!</p>
-<a href={{actor.id}}>{{actor.name}}</a>
-sent you a message from
-{{appName}}.
+  <a href={{actor.id}}>{{#if
+      actor.name
+    }}{{actor.name}}{{else}}Somebody{{/if}}</a>
+  sent you a message from
+  {{appName}}.
+</p>
 
-<p>{{object.content}}</p>
+<blockquote>{{object.content}}</blockquote>
 
-<a href='https://sleepy.bike/messages/{{actor.id}}'>Reply on {{appName}}</a>
+<a
+  href='https://sleepy.bike/messages/{{encodeURIComponent actor.id}}'
+  class='action-button'
+>Reply on
+  {{appName}}</a>

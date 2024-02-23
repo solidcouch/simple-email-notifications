@@ -5,9 +5,12 @@ import { Middleware } from 'koa'
 import { pick } from 'lodash'
 import * as config from '../config'
 import { sendMail } from '../services/mailerService'
+import { generateHtmlMessage } from '../templates/generateMessage'
 import { findWritableSettings, getBotFetch } from '../utils'
 
-export const initializeIntegration: Middleware = async ctx => {
+export const initializeIntegration: Middleware<{
+  user: string
+}> = async ctx => {
   // we should receive info about webId and email address
   const email: string = ctx.request.body.email
   const user: string = ctx.state.user
@@ -30,11 +33,20 @@ export const initializeIntegration: Middleware = async ctx => {
 
   const emailVerificationLink = `${config.baseUrl}/verify-email?token=${jwt}`
 
+  const subject = `Verify your email for ${config.appName} notifications`
+
   await sendMail({
-    from: config.emailSender,
+    from: {
+      name: `${config.appName} notifications`,
+      address: config.emailSender,
+    },
     to: email,
-    subject: `Verify your email for ${config.appName} notifications`,
-    html: `Please verify your email <a href="${emailVerificationLink}">click here</a>`,
+    subject,
+    html: await generateHtmlMessage('verification', {
+      actor: ctx.state.user,
+      emailVerificationLink,
+      title: subject,
+    }),
     text: `Please verify your email ${emailVerificationLink}`,
   })
   ctx.response.body = 'Success'

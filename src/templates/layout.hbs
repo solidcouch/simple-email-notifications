@@ -2,15 +2,17 @@
   <head>
     <meta charset='utf-8' />
     <title>{{title}}</title>
-    <style>
-      /* Email styles go here */ body { font-family: Arial, sans-serif; }
-    </style>
   </head>
   <body>
+    <header><img
+        alt='logo of {{appName}}'
+        src={{appLogo}}
+        height='32'
+      /></header>
     {{{body}}}
     <footer>
-      <p>Contact us at
-        <a href='mailto:support@example.com'>support@example.com</a></p>
+      <p>You can contact us at
+        <a href='mailto:{{supportEmail}}'>{{supportEmail}}</a></p>
     </footer>
   </body>
 </html>

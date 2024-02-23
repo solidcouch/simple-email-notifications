@@ -31,6 +31,8 @@ export const notification: Middleware<
     )
 
   for (const email of emails) {
+    const subject = `${body.actor.name || 'Someone'} wrote you from ${appName}`
+
     await sendMail({
       from: {
         name: body.actor.name
@@ -42,8 +44,11 @@ export const notification: Middleware<
         name: body.target.name ?? '',
         address: email,
       },
-      subject: `${body.actor.name || 'Someone'} wrote you from ${appName}`,
-      html: await generateHtmlMessage('message', body),
+      subject,
+      html: await generateHtmlMessage('message', {
+        ...body,
+        title: subject,
+      }),
       text: body.object.content,
     })
   }

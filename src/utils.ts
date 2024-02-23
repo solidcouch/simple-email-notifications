@@ -3,6 +3,8 @@ import { QueryAndStore } from '@ldhop/core/dist/src/QueryAndStore'
 import { fetchRdfDocument } from '@ldhop/core/dist/src/utils/helpers'
 import { getAuthenticatedFetch as getAuthenticatedFetch6x } from 'css-authn/dist/6.x'
 import { getAuthenticatedFetch as getAuthenticatedFetch7x } from 'css-authn/dist/7.x'
+import fs from 'fs'
+import mime from 'mime'
 import { NamedNode, Quad } from 'n3'
 import { dct, rdfs, solid, space } from 'rdf-namespaces'
 import * as config from './config'
@@ -17,7 +19,7 @@ import * as config from './config'
  * - In the settings, find (webId) - example:emailVerificationToken -> (JWT)
  */
 const findEmailQuery: RdfQuery = [
-  // Go to person's webId and fetch extended profile documents, too
+  // Go to person's webId and fetch extended proimage documents, too
   {
     type: 'match',
     subject: '?person',
@@ -201,4 +203,13 @@ const run = async (qas: QueryAndStore) => {
       missingResources = qas.getMissingResources()
     }
   }
+}
+
+export const getBase64Image = (pathOrBase64: string) => {
+  if (pathOrBase64.startsWith('data:')) return pathOrBase64
+
+  const content = fs.readFileSync(pathOrBase64)
+  const type = mime.getType(pathOrBase64)
+  const base64 = content.toString('base64')
+  return `data:${type};base64,${base64}`
 }
