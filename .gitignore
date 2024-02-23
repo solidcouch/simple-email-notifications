@@ -6,3 +6,7 @@ node_modules
 database.sqlite
 
 *.pem
+
+# Screenshots of emails from testing
+screenshots/*
+!screenshots/.keep

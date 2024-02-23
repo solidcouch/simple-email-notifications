@@ -65,7 +65,7 @@ let maildev: InstanceType<typeof MailDev>
 before(done => {
   maildev = new MailDev({
     silent: true, // Set to false if you want to see server logs
-    disableWeb: true, // Disable the web interface for testing
+    disableWeb: false, // Disable the web interface for testing
   })
   maildev.listen(done)
 })

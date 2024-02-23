@@ -1,6 +1,7 @@
 import { DefaultContext, Middleware } from 'koa'
-import { emailSender } from '../config'
+import { appName, emailSender } from '../config'
 import { sendMail } from '../services/mailerService'
+import { generateHtmlMessage } from '../templates/generateMessage'
 import { getVerifiedEmails } from './status'
 
 export type GoodBody = {
@@ -30,11 +31,24 @@ export const notification: Middleware<
     )
 
   for (const email of emails) {
+    const subject = `${body.actor.name || 'Someone'} wrote you from ${appName}`
+
     await sendMail({
-      from: emailSender,
-      to: email,
-      subject: 'You have a new message from sleepy.bike!', // TODO generalize
-      html: body.object.content,
+      from: {
+        name: body.actor.name
+          ? `${body.actor.name} (via ${appName})`
+          : `${appName} notifications`,
+        address: emailSender,
+      },
+      to: {
+        name: body.target.name ?? '',
+        address: email,
+      },
+      subject,
+      html: await generateHtmlMessage('message', {
+        ...body,
+        title: subject,
+      }),
       text: body.object.content,
     })
   }

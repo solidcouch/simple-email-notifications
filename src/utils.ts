@@ -17,7 +17,7 @@ import * as config from './config'
  * - In the settings, find (webId) - example:emailVerificationToken -> (JWT)
  */
 const findEmailQuery: RdfQuery = [
-  // Go to person's webId and fetch extended profile documents, too
+  // Go to person's webId and fetch extended proimage documents, too
   {
     type: 'match',
     subject: '?person',

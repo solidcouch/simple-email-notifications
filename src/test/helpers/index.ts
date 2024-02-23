@@ -1,6 +1,7 @@
 import { expect } from 'chai'
 import * as cheerio from 'cheerio'
 import { createAccount } from 'css-authn/dist/7.x'
+import * as puppeteer from 'puppeteer'
 import { createSandbox } from 'sinon'
 import { v4 as uuidv4 } from 'uuid'
 import * as config from '../../config'
@@ -79,4 +80,14 @@ export const verifyEmail = async ({
   const { token } = await finishIntegration(verificationLink)
 
   return token
+}
+
+export const takeScreenshot = async (email: { html: string }, name: string) => {
+  const browser = await puppeteer.launch()
+
+  const page = await browser.newPage()
+  await page.setContent(email.html)
+  await page.screenshot({ path: `screenshots/${name}.png` })
+
+  await browser.close()
 }

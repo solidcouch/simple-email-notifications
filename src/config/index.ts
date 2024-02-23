@@ -7,6 +7,13 @@ import SMTPTransport from 'nodemailer/lib/smtp-transport'
 // server base url, e.g. to construct correct email verification links
 export const baseUrl = process.env.BASE_URL ?? 'http://localhost:3005'
 
+export const appName = process.env.APP_NAME ?? 'Sleepy.bike'
+
+// default is sleepy.bike logo
+export const appLogo = process.env.APP_LOGO ?? './logo.png'
+
+export const supportEmail = process.env.SUPPORT_EMAIL ?? 'support@sleepy.bike'
+
 // identity under which the mailer is operating
 export const mailerCredentials = {
   email: process.env.MAILER_IDENTITY_EMAIL ?? 'bot@example',
@@ -26,7 +33,7 @@ const stringToBoolean = (value: string | undefined): boolean => {
 }
 // SMTP transport for nodemailer (setup for sending emails)
 export const smtpTransportOptions: SMTPTransport.Options = {
-  host: process.env.SMTP_TRANSPORT_HOST || undefined,
+  host: process.env.SMTP_TRANSPORT_HOST || '0.0.0.0',
   port: process.env.SMTP_TRANSPORT_PORT
     ? +process.env.SMTP_TRANSPORT_PORT
     : 1025, // default works for maildev
@@ -39,7 +46,8 @@ export const smtpTransportOptions: SMTPTransport.Options = {
 }
 
 // email address which will be the sender of the notifications and email verification messages
-export const emailSender = process.env.EMAIL_SENDER
+export const emailSender =
+  process.env.EMAIL_SENDER ?? 'noreply@notifications.sleepy.bike'
 
 export const port: number = +(process.env.PORT ?? 3005)
 
