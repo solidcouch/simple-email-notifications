@@ -64,7 +64,7 @@
     "ajv-formats": "^2.1.1",
     "bcryptjs": "^2.4.3",
     "cross-fetch": "^4.0.0",
-    "css-authn": "^0.0.14",
+    "css-authn": "^0.0.15-alpha.3",
     "dotenv": "^16.0.0",
     "fs-extra": "^11.2.0",
     "handlebars": "^4.7.8",

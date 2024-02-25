@@ -1,8 +1,7 @@
 import { RdfQuery } from '@ldhop/core/dist/src'
 import { QueryAndStore } from '@ldhop/core/dist/src/QueryAndStore'
 import { fetchRdfDocument } from '@ldhop/core/dist/src/utils/helpers'
-import { getAuthenticatedFetch as getAuthenticatedFetch6x } from 'css-authn/dist/6.x'
-import { getAuthenticatedFetch as getAuthenticatedFetch7x } from 'css-authn/dist/7.x'
+import { v6, v7 } from 'css-authn'
 import { NamedNode, Quad } from 'n3'
 import { dct, rdfs, solid, space } from 'rdf-namespaces'
 import * as config from './config'
@@ -168,8 +167,8 @@ const getAllowedAccess = async (
 export const getBotFetch = async () => {
   const getAuthenticatedFetch =
     config.mailerCredentials.cssVersion === 6
-      ? getAuthenticatedFetch6x
-      : getAuthenticatedFetch7x
+      ? v6.getAuthenticatedFetch
+      : v7.getAuthenticatedFetch
   return await getAuthenticatedFetch(config.mailerCredentials)
 }
 

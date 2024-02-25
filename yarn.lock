@@ -4419,10 +4419,10 @@ cross-spawn@^7.0.2, cross-spawn@^7.0.3:
     shebang-command "^2.0.0"
     which "^2.0.1"
 
-css-authn@^0.0.14:
-  version "0.0.14"
-  resolved "https://registry.yarnpkg.com/css-authn/-/css-authn-0.0.14.tgz#07db8837cae457a3cb9351be77acb54dd118e964"
-  integrity sha512-C2NsdfRjeqxq/NV2CG805dZXuzpgQOBTXLhm9sX1QMpmvcyWS+N6/UxNvYxRSWbf9BsGfhU2LU6RgCwqtw3zAg==
+css-authn@^0.0.15-alpha.3:
+  version "0.0.15-alpha.3"
+  resolved "https://registry.npmjs.org/css-authn/-/css-authn-0.0.15-alpha.3.tgz#4b0b6d8ee17da56c766147f4cfbc5be2fcd44340"
+  integrity sha512-VNe9yIjU7cvOEYYKZPT9e18jQrwuC5FhW4Gza7atg6AEoC2COZEFhKysiYznidvQSE+0lX34HTaW7sGRRsYVbQ==
   dependencies:
     "@inrupt/solid-client-authn-core" "^1.17.5"
     tough-cookie "^4.1.3"
