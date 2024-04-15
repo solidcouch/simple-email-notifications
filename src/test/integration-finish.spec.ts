@@ -5,7 +5,7 @@ import { describe } from 'mocha'
 import { SinonSandbox, createSandbox } from 'sinon'
 import * as config from '../config'
 import { fetchRdf } from '../utils'
-import { initIntegration } from './helpers'
+import { initIntegration, takeScreenshot } from './helpers'
 import { setupEmailSettings } from './helpers/setupPod'
 import { authenticatedFetch, person } from './testSetup.spec'
 
@@ -48,7 +48,9 @@ describe('email verification via /verify-email?token=jwt', () => {
 
   it('[correct token] should return proof of verification for the user to save on their pod', async () => {
     // the proof is a JWT token, it keeps email and webId of the person as payload
-    const response = await fetch(verificationLink)
+    const response = await fetch(verificationLink, {
+      headers: { accept: 'text/plain' },
+    })
     expect(response.ok).to.be.true
     const jwt = await response.text()
     const payload = jsonwebtoken.decode(jwt) as jsonwebtoken.JwtPayload
@@ -66,9 +68,11 @@ describe('email verification via /verify-email?token=jwt', () => {
     const quadsBefore = await fetchRdf(settings)
     expect(quadsBefore).to.have.length(0)
 
-    const response = await fetch(verificationLink)
+    const response = await fetch(verificationLink, {
+      headers: { accept: 'application/json' },
+    })
     expect(response.ok).to.be.true
-    const jwt = await response.text()
+    const { token: jwt } = await response.json()
 
     // after, the settings should contain triple <webId> <verification token predicate (config)> "token".
     const quadsAfter = await fetchRdf(settings)
@@ -78,6 +82,19 @@ describe('email verification via /verify-email?token=jwt', () => {
       config.verificationTokenPredicate,
     )
     expect(quadsAfter[0].object.value).to.equal(jwt)
+  })
+
+  it('[correct token & client accepts html] should display human-readable informative message', async () => {
+    const response = await fetch(verificationLink, {
+      headers: { accept: 'text/html' },
+    })
+    expect(response.ok).to.be.true
+    const body = await response.text()
+    expect(response.headers.get('content-type')).to.equal('text/html')
+    expect(body).to.include('Your email was successfully verified')
+
+    // generate screenshot
+    await takeScreenshot({ html: body }, 'successHtmlResponse')
   })
 
   it('[incorrect token] should respond with 400', async () => {

@@ -9,6 +9,8 @@ export const baseUrl = process.env.BASE_URL ?? 'http://localhost:3005'
 
 export const appName = process.env.APP_NAME ?? 'Sleepy.bike'
 
+export const appUrl = process.env.APP_URL ?? 'https://sleepy.bike'
+
 // default is sleepy.bike logo
 export const appLogo = process.env.APP_LOGO ?? './logo.png'
 

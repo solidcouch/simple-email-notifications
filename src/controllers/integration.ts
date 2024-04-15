@@ -110,9 +110,33 @@ export const finishIntegration: Middleware = async ctx => {
       token: jwt,
     }
   } else {
-    ctx.response.body = jwt
-    ctx.set('content-type', 'text/plain')
     ctx.response.status = 200
+
+    const accepts = ctx.accepts(['html', 'json'])
+
+    switch (accepts) {
+      case 'html': {
+        ctx.set('content-type', 'text/html')
+        let body = `Your email was successfully verified.`
+        if (config.appUrl) {
+          body += ` You can go back to <a href="${config.appUrl}">${config.appName}</a> now.`
+        }
+        ctx.response.body = body
+        break
+      }
+      case 'json': {
+        ctx.response.body = JSON.stringify({
+          message: 'Your email was successfully verified.',
+          token: jwt,
+        })
+        ctx.set('content-type', 'application/json')
+        break
+      }
+      default: {
+        ctx.response.body = jwt
+        ctx.set('content-type', 'text/plain')
+      }
+    }
   }
 }
 
