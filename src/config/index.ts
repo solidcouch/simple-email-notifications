@@ -7,14 +7,14 @@ import SMTPTransport from 'nodemailer/lib/smtp-transport'
 // server base url, e.g. to construct correct email verification links
 export const baseUrl = process.env.BASE_URL ?? 'http://localhost:3005'
 
-export const appName = process.env.APP_NAME ?? 'Sleepy.bike'
+export const appName = process.env.APP_NAME ?? 'Tired.bike'
 
-export const appUrl = process.env.APP_URL ?? 'https://sleepy.bike'
+export const appUrl = process.env.APP_URL ?? 'https://tired.bike'
 
-// default is sleepy.bike logo
+// default is tired.bike logo
 export const appLogo = process.env.APP_LOGO ?? './logo.png'
 
-export const supportEmail = process.env.SUPPORT_EMAIL ?? 'support@sleepy.bike'
+export const supportEmail = process.env.SUPPORT_EMAIL ?? 'support@tired.bike'
 
 // identity under which the mailer is operating
 export const mailerCredentials = {
@@ -49,7 +49,7 @@ export const smtpTransportOptions: SMTPTransport.Options = {
 
 // email address which will be the sender of the notifications and email verification messages
 export const emailSender =
-  process.env.EMAIL_SENDER ?? 'noreply@notifications.sleepy.bike'
+  process.env.EMAIL_SENDER ?? 'noreply@notifications.tired.bike'
 
 export const port: number = +(process.env.PORT ?? 3005)
 
