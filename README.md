@@ -35,7 +35,25 @@ Alternatively, you may provide the configuration as environment variables
 
 You can find full list of config options in [.env.sample](./.env.sample)
 
+### Provide private key for JWT
+
+You must provide a path to a private key for signing and verifying JWT tokens in `.env` file. You can generate it:
+
+```
+openssl ecparam -name prime256v1 -genkey -noout -out ecdsa-p256-private.pem
+```
+
+Default algorithm is ES256, but you can specify a different one.
+
 ### Run
+
+Install for production:
+
+```sh
+yarn install --frozen-lockfile --production
+```
+
+Run:
 
 ```sh
 yarn start
@@ -47,7 +65,17 @@ Service API is documented in [OpenAPI schema](./apidocs/openapi.json) (still wor
 
 ## Tests
 
-Run `yarn test`
+Install for development:
+
+```sh
+yarn install --frozen-lockfile
+```
+
+Run:
+
+```sh
+yarn test
+```
 
 Tests are placed in [src/test/](./src/test/)
 
