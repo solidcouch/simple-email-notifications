@@ -1,0 +1,7 @@
+{
+  "project": ["**/*.{js,ts}"],
+  "entry": ["src/index.ts", "src/generate-api-docs.ts"],
+  "ignore": ["apidocs/*"],
+  "ignoreDependencies": ["@types/co-body"],
+  "ignoreBinaries": ["openssl"]
+}

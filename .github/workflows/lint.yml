@@ -19,11 +19,14 @@ jobs:
       - name: Install NPM packages
         run: yarn install --frozen-lockfile
 
-      - name: Run linters
-        uses: wearerequired/lint-action@v2
-        with:
-          eslint: true
-          eslint_args: --max-warnings 0
-          eslint_extensions: js,ts,tsx
-          prettier: true
-          continue_on_error: false
+      - name: Check code style
+        run: yarn lint --max-warnings 0
+
+      - name: Check formatting
+        run: yarn prettier . --check
+
+      - name: Check clutter
+        run: yarn knip
+
+      - name: Check that TypeScript compiles
+        run: yarn tsc

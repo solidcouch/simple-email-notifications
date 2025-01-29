@@ -1,7 +1,7 @@
 import * as cheerio from 'cheerio'
 import { createAccount } from 'css-authn/dist/7.x.js'
+import { randomUUID } from 'node:crypto'
 import * as puppeteer from 'puppeteer'
-import { v4 as uuidv4 } from 'uuid'
 import { expect, vi } from 'vitest'
 import * as config from '../../config/index.js'
 import * as mailerService from '../../services/mailerService.js'
@@ -14,9 +14,9 @@ export const createRandomAccount = ({
   solidServer: string
 }) => {
   return createAccount({
-    username: uuidv4(),
-    password: uuidv4(),
-    email: uuidv4() + '@example.com',
+    username: randomUUID(),
+    password: randomUUID(),
+    email: randomUUID() + '@example.com',
     provider: solidServer,
   })
 }
