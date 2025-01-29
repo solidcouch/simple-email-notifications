@@ -1,5 +1,5 @@
 import { Middleware } from 'koa'
-import { get } from 'lodash'
+import get from 'lodash/get.js'
 import { Parser } from 'n3'
 import { vcard } from 'rdf-namespaces'
 

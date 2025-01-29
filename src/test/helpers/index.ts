@@ -1,13 +1,12 @@
-import { expect } from 'chai'
 import * as cheerio from 'cheerio'
-import { createAccount } from 'css-authn/dist/7.x'
+import { createAccount } from 'css-authn/dist/7.x.js'
 import * as puppeteer from 'puppeteer'
-import { createSandbox } from 'sinon'
 import { v4 as uuidv4 } from 'uuid'
-import * as config from '../../config'
-import * as mailerService from '../../services/mailerService'
-import { setupEmailSettings } from './setupPod'
-import { Person } from './types'
+import { expect, vi } from 'vitest'
+import * as config from '../../config/index.js'
+import * as mailerService from '../../services/mailerService.js'
+import { setupEmailSettings } from './setupPod.js'
+import { Person } from './types.js'
 
 export const createRandomAccount = ({
   solidServer,
@@ -29,8 +28,7 @@ export const initIntegration = async ({
   email: string
   authenticatedFetch: typeof fetch
 }) => {
-  const sandbox = createSandbox()
-  const sendMailSpy = sandbox.spy(mailerService, 'sendMail')
+  const sendMailSpy = vi.spyOn(mailerService, 'sendMail')
   const initResponse = await authenticatedFetch(`${config.baseUrl}/init`, {
     method: 'post',
     headers: { 'content-type': 'application/json' },
@@ -39,11 +37,12 @@ export const initIntegration = async ({
 
   expect(initResponse.status).to.equal(200)
   // email was sent
-  const emailMessage = sendMailSpy.firstCall.firstArg.html
-  const $ = cheerio.load(emailMessage)
-  const verificationLink = $('a').first().attr('href') as string
+  const emailMessage = sendMailSpy.mock.calls[0][0].html as string
+  expect(emailMessage).toBeDefined()
+  const $ = cheerio.load(emailMessage as string)
+  const verificationLink = $('a').first().attr('href')
   expect(verificationLink).to.not.be.null
-  sandbox.restore()
+  vi.restoreAllMocks()
 
   return { verificationLink }
 }
@@ -77,13 +76,18 @@ export const verifyEmail = async ({
     authenticatedFetch,
   })
 
-  const { token } = await finishIntegration(verificationLink)
+  expect(verificationLink).toBeDefined()
+
+  const { token } = await finishIntegration(verificationLink!)
 
   return token
 }
 
 export const takeScreenshot = async (email: { html: string }, name: string) => {
-  const browser = await puppeteer.launch()
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ['--no-sandbox'],
+  })
 
   const page = await browser.newPage()
   await page.setContent(email.html)

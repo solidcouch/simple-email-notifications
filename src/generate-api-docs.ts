@@ -1,6 +1,6 @@
 // https://swagger-autogen.github.io/docs/getting-started/advanced-usage#openapi-3x
 import swaggerAutogen from 'swagger-autogen'
-import { init, notification } from './schema'
+import { init, notification } from './schema.js'
 
 const doc = {
   info: {

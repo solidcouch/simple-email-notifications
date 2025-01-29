@@ -1,34 +1,31 @@
-import { expect } from 'chai'
 import fetch from 'cross-fetch'
 import * as jsonwebtoken from 'jsonwebtoken'
-import { describe } from 'mocha'
-import { SinonSandbox, createSandbox } from 'sinon'
-import * as config from '../config'
-import { fetchRdf } from '../utils'
-import { initIntegration, takeScreenshot } from './helpers'
-import { setupEmailSettings } from './helpers/setupPod'
-import { authenticatedFetch, person } from './testSetup.spec'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import * as config from '../config/index.js'
+import { fetchRdf } from '../utils.js'
+import { initIntegration, takeScreenshot } from './helpers/index.js'
+import { setupEmailSettings } from './helpers/setupPod.js'
+import { authenticatedFetch, person } from './setup.js'
 
 describe('email verification via /verify-email?token=jwt', () => {
   let verificationLink: string
-  let sandbox: SinonSandbox
   let settings: string
 
   beforeEach(() => {
-    sandbox = createSandbox()
-    sandbox.useFakeTimers({ now: Date.now(), toFake: ['Date'] })
+    vi.useFakeTimers({ now: Date.now(), toFake: ['Date'] })
   })
 
   afterEach(() => {
-    sandbox.restore()
+    vi.useRealTimers()
   })
 
   beforeEach(async () => {
     // initialize the integration
-    ;({ verificationLink } = await initIntegration({
+    const initIntegrationResponse = await initIntegration({
       email: 'email@example.com',
       authenticatedFetch,
-    }))
+    })
+    verificationLink = initIntegrationResponse.verificationLink!
   })
 
   beforeEach(async () => {
@@ -114,7 +111,7 @@ describe('email verification via /verify-email?token=jwt', () => {
   })
 
   it('[expired token] should respond with 400', async () => {
-    sandbox.clock.tick(3601 * 1000)
+    vi.advanceTimersByTime(3601 * 1000)
     const response = await fetch(verificationLink)
     // wait one hour and one second
     expect(response.status).to.equal(400)

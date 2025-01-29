@@ -1,14 +1,15 @@
 import * as css from '@solid/community-server'
 import fetch from 'cross-fetch'
-import { getAuthenticatedFetch } from 'css-authn/dist/7.x'
+import { getAuthenticatedFetch } from 'css-authn/dist/7.x.js'
 import { IncomingMessage, Server, ServerResponse } from 'http'
 import MailDev from 'maildev'
 import { HttpResponse, http } from 'msw'
 import { SetupServer, setupServer } from 'msw/node'
-import app from '../app'
-import { port } from '../config'
-import { createRandomAccount } from './helpers'
-import type { Person } from './helpers/types'
+import { afterAll, afterEach, beforeAll, beforeEach } from 'vitest'
+import app from '../app.js'
+import { port } from '../config/index.js'
+import { createRandomAccount } from './helpers/index.js'
+import type { Person } from './helpers/types.js'
 
 let server: Server<typeof IncomingMessage, typeof ServerResponse>
 let authenticatedFetch: typeof fetch
@@ -20,8 +21,7 @@ let person3: Person
 let cssServer: css.App
 let mockServer: SetupServer
 
-before(async function () {
-  this.timeout(60000)
+beforeAll(async () => {
   const start = Date.now()
 
   // eslint-disable-next-line no-console
@@ -47,30 +47,39 @@ before(async function () {
 
   // eslint-disable-next-line no-console
   console.log('CSS server started in', (Date.now() - start) / 1000, 'seconds')
-})
+}, 60000)
 
-after(async () => {
+afterAll(async () => {
   await cssServer.stop()
 })
 
-before(done => {
-  server = app.listen(port, done)
+beforeAll(async () => {
+  await new Promise<void>(resolve => {
+    server = app.listen(port, resolve)
+  })
 })
-after(done => {
-  server.close(done)
+
+afterAll(async () => {
+  await new Promise(resolve => {
+    server.close(resolve)
+  })
 })
 
 // run maildev server
 let maildev: InstanceType<typeof MailDev>
-before(done => {
-  maildev = new MailDev({
-    silent: true, // Set to false if you want to see server logs
-    disableWeb: false, // Disable the web interface for testing
+beforeAll(async () => {
+  await new Promise(resolve => {
+    maildev = new MailDev({
+      silent: true, // Set to false if you want to see server logs
+      disableWeb: false, // Disable the web interface for testing
+    })
+    maildev.listen(resolve)
   })
-  maildev.listen(done)
 })
-after(done => {
-  maildev.close(done)
+afterAll(async () => {
+  await new Promise(resolve => {
+    maildev.close(resolve)
+  })
 })
 
 /**

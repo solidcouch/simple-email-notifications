@@ -1,8 +1,8 @@
-import { readFile } from 'fs-extra'
-import { verify } from 'jsonwebtoken'
+import jsonwebtoken from 'jsonwebtoken'
 import type { DefaultContext, DefaultState, Middleware } from 'koa'
-import * as config from '../config'
-import { findEmailVerificationTokens } from '../utils'
+import { readFile } from 'node:fs/promises'
+import * as config from '../config/index.js'
+import { findEmailVerificationTokens } from '../utils.js'
 
 export const getVerifiedEmails = async (webId: string) => {
   const tokens = await findEmailVerificationTokens(webId)
@@ -12,7 +12,8 @@ export const getVerifiedEmails = async (webId: string) => {
   const verifiedEmails = tokens
     .map(token => {
       try {
-        return verify(token, pem) as {
+        // eslint-disable-next-line import/no-named-as-default-member
+        return jsonwebtoken.verify(token, pem) as {
           webId: string
           email: string
           emailVerified: boolean

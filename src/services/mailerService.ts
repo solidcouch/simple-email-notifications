@@ -1,7 +1,7 @@
 import * as nodemailer from 'nodemailer'
 import Mail from 'nodemailer/lib/mailer'
 import * as path from 'path'
-import { appLogo, smtpTransportOptions } from '../config'
+import { appLogo, smtpTransportOptions } from '../config/index.js'
 
 export const sendMail = async (options: Mail.Options) => {
   const smtpTransport = nodemailer.createTransport(smtpTransportOptions)

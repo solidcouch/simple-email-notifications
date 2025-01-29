@@ -1,12 +1,18 @@
-import { expect } from 'chai'
 import fetch from 'cross-fetch'
-import { describe } from 'mocha'
-import Mail from 'nodemailer/lib/mailer'
-import { SinonSandbox, SinonSpy, createSandbox } from 'sinon'
-import { baseUrl } from '../config'
-import type { GoodBody } from '../controllers/notification'
-import * as mailerService from '../services/mailerService'
-import { verifyEmail } from './helpers'
+import Mail from 'nodemailer/lib/mailer/index.js'
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  MockInstance,
+  vi,
+} from 'vitest'
+import { baseUrl } from '../config/index.js'
+import type { GoodBody } from '../controllers/notification.js'
+import * as mailerService from '../services/mailerService.js'
+import { verifyEmail } from './helpers/index.js'
 import {
   authenticatedFetch,
   authenticatedFetch3,
@@ -14,7 +20,7 @@ import {
   otherPerson,
   person,
   person3,
-} from './testSetup.spec'
+} from './setup.js'
 
 const email = 'email@example.com'
 
@@ -38,8 +44,7 @@ const getBody = ({
 })
 
 describe('send notification via /notification', () => {
-  let sendMailSpy: SinonSpy<[options: Mail.Options], Promise<void>>
-  let sandbox: SinonSandbox
+  let sendMailSpy: MockInstance<(options: Mail.Options) => Promise<void>>
 
   beforeEach(async () => {
     // setup email for receiver
@@ -51,12 +56,11 @@ describe('send notification via /notification', () => {
   })
 
   beforeEach(() => {
-    sandbox = createSandbox()
-    sendMailSpy = sandbox.spy(mailerService, 'sendMail')
+    sendMailSpy = vi.spyOn(mailerService, 'sendMail')
   })
 
   afterEach(() => {
-    sandbox.restore()
+    vi.restoreAllMocks()
   })
 
   it('[everything ok] should send email to email address when requested', async () => {
@@ -72,8 +76,8 @@ describe('send notification via /notification', () => {
     // TODO this should be improved. waiting without knowing how long isn't great
     // await promisify(setTimeout)(2000)
 
-    expect(sendMailSpy.callCount).to.equal(1)
-    const emailNotification = sendMailSpy.firstCall.firstArg
+    expect(sendMailSpy.mock.calls.length).to.equal(1)
+    const emailNotification = sendMailSpy.mock.calls[0][0]
 
     expect(emailNotification).to.exist
     expect(emailNotification.to).to.haveOwnProperty('address', email)

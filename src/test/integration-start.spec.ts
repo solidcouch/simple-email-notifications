@@ -1,26 +1,30 @@
-import { expect } from 'chai'
 import fetch from 'cross-fetch'
-import { describe } from 'mocha'
 import Mail from 'nodemailer/lib/mailer'
-import { SinonSandbox, SinonSpy, createSandbox } from 'sinon'
-import { baseUrl } from '../config'
-import * as mailerService from '../services/mailerService'
-import { authenticatedFetch, otherAuthenticatedFetch } from './testSetup.spec'
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  MockInstance,
+  vi,
+} from 'vitest'
+import { baseUrl } from '../config/index.js'
+import * as mailerService from '../services/mailerService.js'
+import { authenticatedFetch, otherAuthenticatedFetch } from './setup.js'
 
 describe('Initialize email integration via /init', () => {
-  let sendMailSpy: SinonSpy<[options: Mail.Options], Promise<void>>
-  let sandbox: SinonSandbox
+  let sendMailSpy: MockInstance<(options: Mail.Options) => Promise<void>>
 
   beforeEach(() => {
-    sandbox = createSandbox()
-    sendMailSpy = sandbox.spy(mailerService, 'sendMail')
+    sendMailSpy = vi.spyOn(mailerService, 'sendMail')
   })
 
   afterEach(() => {
-    sandbox.restore()
+    vi.restoreAllMocks()
   })
 
-  context('everything ok', () => {
+  describe('everything ok', () => {
     let response: Response
     beforeEach(async () => {
       response = await authenticatedFetch(`${baseUrl}/init`, {
@@ -35,15 +39,15 @@ describe('Initialize email integration via /init', () => {
     })
 
     it('should send email with verification link', async () => {
-      expect(sendMailSpy.calledOnce).to.be.true
-      expect(sendMailSpy.firstCall.firstArg).to.haveOwnProperty(
+      expect(sendMailSpy.mock.calls).to.have.length(1)
+      expect(sendMailSpy.mock.calls[0][0]).to.haveOwnProperty(
         'to',
         'email@example.com',
       )
-      expect(sendMailSpy.firstCall.firstArg)
+      expect(sendMailSpy.mock.calls[0][0])
         .to.haveOwnProperty('text')
         .include(`verify-email?token=eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.`)
-      expect(sendMailSpy.firstCall.firstArg)
+      expect(sendMailSpy.mock.calls[0][0])
         .to.haveOwnProperty('html')
         .include(`verify-email?token=eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.`)
       // maybe TODO we can perhaps also check the payload of the token
@@ -60,7 +64,7 @@ describe('Initialize email integration via /init', () => {
     expect(response.status).to.equal(400)
   })
 
-  context('person not signed in', () => {
+  describe('person not signed in', () => {
     it('should respond with 401', async () => {
       const response = await fetch(`${baseUrl}/init`, {
         method: 'post',
@@ -72,7 +76,7 @@ describe('Initialize email integration via /init', () => {
     })
   })
 
-  context('person is not in the allowed group(s)', () => {
+  describe('person is not in the allowed group(s)', () => {
     it('should respond with 403', async () => {
       const response = await otherAuthenticatedFetch(`${baseUrl}/init`, {
         method: 'post',

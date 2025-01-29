@@ -1,8 +1,8 @@
 import { DefaultContext, Middleware } from 'koa'
-import { appName, emailSender } from '../config'
-import { sendMail } from '../services/mailerService'
-import { generateHtmlMessage } from '../templates/generateMessage'
-import { getVerifiedEmails } from './status'
+import { appName, emailSender } from '../config/index.js'
+import { sendMail } from '../services/mailerService.js'
+import { generateHtmlMessage } from '../templates/generateMessage.js'
+import { getVerifiedEmails } from './status.js'
 
 export type GoodBody = {
   '@context': 'https://www.w3.org/ns/activitystreams'

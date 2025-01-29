@@ -1,10 +1,8 @@
-import { RdfQuery } from '@ldhop/core/dist/src'
-import { QueryAndStore } from '@ldhop/core/dist/src/QueryAndStore'
-import { fetchRdfDocument } from '@ldhop/core/dist/src/utils/helpers'
+import { fetchRdfDocument, QueryAndStore, RdfQuery } from '@ldhop/core'
 import { v6, v7 } from 'css-authn'
 import { NamedNode, Quad } from 'n3'
-import { dct, rdfs, solid, space } from 'rdf-namespaces'
-import * as config from './config'
+import { rdf, rdfs, solid, space } from 'rdf-namespaces'
+import * as config from './config/index.js'
 
 /**
  * To find verified email of a person
@@ -36,9 +34,10 @@ const findEmailQuery: RdfQuery = [
   // Find instances of specific class defined in config (EMAIL_DISCOVERY_TYPE)
   {
     type: 'match',
-    subject: '?publicTypeIndex',
-    predicate: dct.references,
-    pick: 'object',
+    predicate: rdf.type,
+    object: solid.TypeRegistration,
+    graph: '?publicTypeIndex',
+    pick: 'subject',
     target: '?typeRegistration',
   },
   {
@@ -150,7 +149,7 @@ const parseWACAllowHeader = (header: string): PermissionDict => {
  */
 const getAllowedAccess = async (
   url: string,
-  authenticatedFetch: typeof fetch,
+  authenticatedFetch: typeof globalThis.fetch,
 ) => {
   const response = await authenticatedFetch(url, { method: 'head' })
   const header = response.headers.get('wac-allow')

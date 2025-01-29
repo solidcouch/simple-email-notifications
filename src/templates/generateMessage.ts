@@ -1,10 +1,13 @@
-import * as fs from 'fs-extra'
 import Handlebars from 'handlebars'
 import juice from 'juice'
-import path from 'path'
-import * as config from '../config'
+import fs from 'node:fs/promises'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+import * as config from '../config/index.js'
 
 Handlebars.registerHelper('encodeURIComponent', encodeURIComponent)
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 type LayoutData = {
   appName?: string

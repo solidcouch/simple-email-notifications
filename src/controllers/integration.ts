@@ -1,12 +1,14 @@
-import { readFile } from 'fs-extra'
-import * as jsonwebtoken from 'jsonwebtoken'
-import { JsonWebTokenError, TokenExpiredError } from 'jsonwebtoken'
+import jsonwebtoken from 'jsonwebtoken'
 import { Middleware } from 'koa'
-import { pick } from 'lodash'
-import * as config from '../config'
-import { sendMail } from '../services/mailerService'
-import { generateHtmlMessage } from '../templates/generateMessage'
-import { findWritableSettings, getBotFetch } from '../utils'
+import pick from 'lodash/pick.js'
+import { readFile } from 'node:fs/promises'
+import * as config from '../config/index.js'
+import { sendMail } from '../services/mailerService.js'
+import { generateHtmlMessage } from '../templates/generateMessage.js'
+import { findWritableSettings, getBotFetch } from '../utils.js'
+
+// eslint-disable-next-line import/no-named-as-default-member
+const { JsonWebTokenError, TokenExpiredError, sign, verify } = jsonwebtoken
 
 export const initializeIntegration: Middleware<{
   user: string
@@ -20,7 +22,7 @@ export const initializeIntegration: Middleware<{
   const tokenExpiration = config.emailVerificationExpiration
 
   const pem = await readFile(config.jwt.key, { encoding: 'utf-8' })
-  const jwt = jsonwebtoken.sign(
+  const jwt = sign(
     {
       webId: user,
       email,
@@ -63,7 +65,7 @@ export const checkVerificationLink: Middleware = async (ctx, next) => {
 
   const pem = await readFile(config.jwt.key, { encoding: 'utf-8' })
   try {
-    const payload = jsonwebtoken.verify(jwt, pem) as {
+    const payload = verify(jwt, pem) as {
       webId: string
       email: string
       emailVerified: boolean
@@ -92,7 +94,7 @@ export const finishIntegration: Middleware = async ctx => {
   }
 
   const pem = await readFile(config.jwt.key, { encoding: 'utf-8' })
-  const jwt = jsonwebtoken.sign(
+  const jwt = sign(
     { webId, email, emailVerified: true, iss: config.mailerCredentials.webId },
     pem,
     { algorithm: 'ES256' },

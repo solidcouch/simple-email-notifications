@@ -5,7 +5,13 @@ import SMTPTransport from 'nodemailer/lib/smtp-transport'
 // either via .env file, or via environment variables directly (depends on your setup)
 
 // server base url, e.g. to construct correct email verification links
-export const baseUrl = process.env.BASE_URL ?? 'http://localhost:3005'
+// export const baseUrl = process.env.BASE_URL ?? 'http://localhost:3005'
+export const port: number = +(process.env.PORT ?? 3005)
+
+export const baseUrl =
+  process.env.NODE_ENV === 'vitest' || !process.env.BASE_URL
+    ? `http://localhost:${port}`
+    : process.env.BASE_URL
 
 export const appName = process.env.APP_NAME ?? 'Tired.bike'
 
@@ -50,8 +56,6 @@ export const smtpTransportOptions: SMTPTransport.Options = {
 // email address which will be the sender of the notifications and email verification messages
 export const emailSender =
   process.env.EMAIL_SENDER ?? 'noreply@notifications.tired.bike'
-
-export const port: number = +(process.env.PORT ?? 3005)
 
 // email verification expiration in seconds (1 hour)
 export const emailVerificationExpiration = 3600

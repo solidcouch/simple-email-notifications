@@ -1,24 +1,24 @@
-import bodyParser from '@koa/bodyparser'
+import { bodyParser } from '@koa/bodyparser'
 import cors from '@koa/cors'
 import Router from '@koa/router'
 import Koa from 'koa'
 import helmet from 'koa-helmet'
 import serve from 'koa-static'
-import { allowedGroups, isBehindProxy } from './config'
+import { allowedGroups, isBehindProxy } from './config/index.js'
 import {
   checkVerificationLink,
   finishIntegration,
   initializeIntegration,
-} from './controllers/integration'
-import { notification } from './controllers/notification'
-import { getStatus } from './controllers/status'
+} from './controllers/integration.js'
+import { notification } from './controllers/notification.js'
+import { getStatus } from './controllers/status.js'
 import {
   authorizeGroups,
   checkGroupMembership,
-} from './middlewares/authorizeGroup'
-import { solidAuth } from './middlewares/solidAuth'
-import { validateBody } from './middlewares/validate'
-import * as schema from './schema'
+} from './middlewares/authorizeGroup.js'
+import { solidAuth } from './middlewares/solidAuth.js'
+import { validateBody } from './middlewares/validate.js'
+import * as schema from './schema.js'
 
 const app = new Koa()
 app.proxy = isBehindProxy

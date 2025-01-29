@@ -1,15 +1,14 @@
-import { expect } from 'chai'
 import fetch from 'cross-fetch'
-import { describe } from 'mocha'
-import { baseUrl } from '../config'
-import type { GoodBody } from '../controllers/notification'
-import { takeScreenshot, verifyEmail } from './helpers'
+import { beforeEach, describe, expect, it } from 'vitest'
+import { baseUrl } from '../config/index.js'
+import type { GoodBody } from '../controllers/notification.js'
+import { takeScreenshot, verifyEmail } from './helpers/index.js'
 import {
   authenticatedFetch,
   authenticatedFetch3,
   person,
   person3,
-} from './testSetup.spec'
+} from './setup.js'
 
 const email = 'email@example.com'
 

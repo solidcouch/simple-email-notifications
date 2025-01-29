@@ -1,7 +1,7 @@
-import { expect } from 'chai'
 import { foaf, solid, space } from 'rdf-namespaces'
-import * as config from '../../config'
-import { Person } from './types'
+import { expect } from 'vitest'
+import * as config from '../../config/index.js'
+import { Person } from './types.js'
 
 const createFile = async ({
   url,
