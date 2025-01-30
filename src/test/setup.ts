@@ -1,6 +1,6 @@
 import * as css from '@solid/community-server'
 import fetch from 'cross-fetch'
-import { getAuthenticatedFetch } from 'css-authn/dist/7.x.js'
+import { v7 } from 'css-authn'
 import { IncomingMessage, Server, ServerResponse } from 'http'
 import MailDev from 'maildev'
 import { HttpResponse, http } from 'msw'
@@ -87,7 +87,7 @@ afterAll(async () => {
  */
 beforeEach(async () => {
   person = await createRandomAccount({ solidServer: 'http://localhost:3456' })
-  authenticatedFetch = await getAuthenticatedFetch({
+  authenticatedFetch = await v7.getAuthenticatedFetch({
     email: person.email,
     password: person.password,
     provider: 'http://localhost:3456',
@@ -96,14 +96,14 @@ beforeEach(async () => {
   otherPerson = await createRandomAccount({
     solidServer: 'http://localhost:3456',
   })
-  otherAuthenticatedFetch = await getAuthenticatedFetch({
+  otherAuthenticatedFetch = await v7.getAuthenticatedFetch({
     email: otherPerson.email,
     password: otherPerson.password,
     provider: 'http://localhost:3456',
   })
 
   person3 = await createRandomAccount({ solidServer: 'http://localhost:3456' })
-  authenticatedFetch3 = await getAuthenticatedFetch({
+  authenticatedFetch3 = await v7.getAuthenticatedFetch({
     ...person3,
     provider: 'http://localhost:3456',
   })
